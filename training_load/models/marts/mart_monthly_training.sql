@@ -23,6 +23,7 @@ monthly_agg as (
         round(avg(ctl), 2) as avg_ctl,
         round(avg(atl), 2) as avg_atl,
         round(avg(tsb), 2) as avg_tsb,
+        round(avg(weight_kg), 1) as avg_weight_kg,
         round(avg(location_temp_max_c), 1) as avg_location_temp_max_c,
         round(avg(location_temp_min_c), 1) as avg_location_temp_min_c,
         round(sum(precipitation_mm), 1) as total_precipitation_mm
@@ -37,6 +38,14 @@ exercise_calorie_target as (
     from {{ ref('targets') }}
     where metric = 'exercise_calories' and period = 'month'
 
+),
+
+exercise_minutes_target as (
+
+    select target_min, target_max
+    from {{ ref('targets') }}
+    where metric = 'exercise_minutes' and period = 'month'
+
 )
 
 select
@@ -47,7 +56,15 @@ select
         when m.total_calories < ect.target_min then 'below_target'
         when m.total_calories > ect.target_max then 'above_target'
         else 'within_target'
-    end as exercise_calorie_target_status
+    end as exercise_calorie_target_status,
+    emt.target_min as exercise_minutes_target_min,
+    emt.target_max as exercise_minutes_target_max,
+    case
+        when m.total_moving_time_hours * 60 < emt.target_min then 'below_target'
+        when m.total_moving_time_hours * 60 > emt.target_max then 'above_target'
+        else 'within_target'
+    end as exercise_minutes_target_status
 from monthly_agg m
 cross join exercise_calorie_target ect
+cross join exercise_minutes_target emt
 order by m.month
