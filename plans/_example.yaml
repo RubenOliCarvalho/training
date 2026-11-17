@@ -1,0 +1,15 @@
+# Example plan file. Copy it, then push with:
+#   venv\Scripts\python.exe pipeline\push_workouts.py plans\<file>.yaml
+# HR targets use your intervals.icu heart-rate zones (Z1 Recovery, Z2 Aerobic, ...).
+plan: example
+workouts:
+  - date: 2026-11-24
+    name: Easy run/walk 25'
+    description: |
+      Warmup
+      - 5m Z1 HR
+      Main set 6x
+      - 2m Z2 HR
+      - 1m Z1 HR
+      Cooldown
+      - 2m Z1 HR

@@ -1,0 +1,53 @@
+# 10K plan - Block 6 - Race week (wk 20): taper and 10K on Sat 10 Apr 2027.
+# Push: venv\Scripts\python.exe pipeline\push_workouts.py plans\10k\6-race.yaml
+plan: 10k-race
+workouts:
+  - date: 2027-04-06
+    name: "10K W20 Tue - Threshold intervals"
+    description: |
+      Race week: short and sharp, finish fresh.
+
+      Warmup
+      - Easy jog/walk 10m Z1-Z2 HR
+
+      Main set 3x
+      - Cruise 3m Z4 HR
+      - Easy jog/walk 2m
+
+      Cooldown
+      - Easy jog/walk 10m Z1-Z2 HR
+  - date: 2027-04-08
+    name: "10K W20 Thu - Easy run + strides"
+    description: |
+      Shake-out: very easy, legs only.
+
+      Warmup
+      - Brisk walk 5m
+
+      Main
+      - Run easy 20m Z1-Z2 HR
+
+      Strides 4x
+      - Relaxed pickup 15s
+      - Walk 45s
+
+      Cooldown
+      - Easy walk 5m
+  - date: 2027-04-10
+    name: "10K W20 Sat - 10K race"
+    description: |
+      10K race / time trial. Start controlled (Z3), only push in the second half. Walk breaks are fine if HR runs away early.
+
+      Warmup
+      - Easy jog/walk 10m Z1-Z2 HR
+
+      Strides 3x
+      - Relaxed pickup 15s
+      - Walk 45s
+
+      Race
+      - First 5k even 5km Z3 HR
+      - Second 5k 5km Z3-Z4 HR
+
+      Cooldown
+      - Easy walk 10m

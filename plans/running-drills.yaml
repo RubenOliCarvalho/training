@@ -1,0 +1,40 @@
+# Running drills session (warm-up, drills, strides, cool-down).
+# Push: venv\Scripts\python.exe pipeline\push_workouts.py plans\running-drills.yaml
+plan: running-drills
+workouts:
+  - date: 2026-11-19
+    name: Running drills + strides
+    description: |
+      Drills: short quick steps, stay relaxed. High knees: thighs to parallel, fast turnover. Butt kicks: heels to butt, knees forward. Skipping: high knee drive, run-like arm swing. Carioca: face sideways, alternate the trailing leg in front and behind. Strides: build smoothly from easy to ~5k effort (RPE 3 to 8), relaxed shoulders, neck and jaw.
+
+      Warmup
+      - Easy jog/walk 8m Z1-Z2 HR
+
+      High knees 3x
+      - High knees 50mtr
+      - Easy jog/walk 45s
+
+      Butt kicks 3x
+      - Butt kicks 50mtr
+      - Easy jog/walk 45s
+
+      Skipping 3x
+      - Skipping 50mtr
+      - Easy jog/walk 45s
+
+      Carioca 4x
+      - Carioca to the right 30mtr
+      - Rest 20s
+      - Carioca to the left 30mtr
+      - Rest 20s
+
+      Strides 3x
+      - Stride, build RPE 3 to 8 60mtr
+      - Easy jog/walk 45s
+
+      Finisher 1x
+      - High knees 50mtr
+      - Butt kicks 50mtr
+
+      Cooldown
+      - Easy walk/jog 5m Z1-Z2 HR

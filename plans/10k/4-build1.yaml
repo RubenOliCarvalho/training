@@ -1,0 +1,168 @@
+# 10K plan - Block 4 - Build 1 (wk 13-16): continuous running; steady Z3 intervals.
+# Push: venv\Scripts\python.exe pipeline\push_workouts.py plans\10k\4-build1.yaml
+plan: 10k-build1
+workouts:
+  - date: 2027-02-16
+    name: "10K W13 Tue - Steady intervals"
+    description: |
+      Steady running: comfortably hard, you can speak in short sentences.
+
+      Warmup
+      - Easy jog/walk 10m Z1-Z2 HR
+
+      Main set 3x
+      - Steady 5m Z3 HR
+      - Easy jog/walk 2m
+
+      Cooldown
+      - Easy jog/walk 10m Z1-Z2 HR
+  - date: 2027-02-18
+    name: "10K W13 Thu - Easy run"
+    description: |
+      Easy: stay conversational; if HR goes above 140, slow down or walk until it settles.
+
+      Warmup
+      - Brisk walk 5m
+
+      Main
+      - Run easy 25m Z1-Z2 HR
+
+      Cooldown
+      - Easy walk 5m
+  - date: 2027-02-20
+    name: "10K W13 Sat - Long run"
+    description: |
+      Long aerobic session: time on feet matters, not pace. Walk 1 min whenever HR goes above 140.
+
+      Warmup
+      - Brisk walk 5m
+
+      Main
+      - Run easy 40m Z1-Z2 HR
+
+      Cooldown
+      - Easy walk 5m
+  - date: 2027-02-23
+    name: "10K W14 Tue - Steady intervals"
+    description: |
+      Steady running: comfortably hard, you can speak in short sentences.
+
+      Warmup
+      - Easy jog/walk 10m Z1-Z2 HR
+
+      Main set 4x
+      - Steady 5m Z3 HR
+      - Easy jog/walk 2m
+
+      Cooldown
+      - Easy jog/walk 10m Z1-Z2 HR
+  - date: 2027-02-25
+    name: "10K W14 Thu - Easy run + strides"
+    description: |
+      Easy: stay conversational; if HR goes above 140, slow down or walk until it settles.
+
+      Warmup
+      - Brisk walk 5m
+
+      Main
+      - Run easy 30m Z1-Z2 HR
+
+      Strides 4x
+      - Relaxed pickup 15s
+      - Walk 45s
+
+      Cooldown
+      - Easy walk 5m
+  - date: 2027-02-27
+    name: "10K W14 Sat - Long run"
+    description: |
+      Long aerobic session: time on feet matters, not pace. Walk 1 min whenever HR goes above 140.
+
+      Warmup
+      - Brisk walk 5m
+
+      Main
+      - Run easy 45m Z1-Z2 HR
+
+      Cooldown
+      - Easy walk 5m
+  - date: 2027-03-02
+    name: "10K W15 Tue - Steady intervals"
+    description: |
+      Steady running: comfortably hard, you can speak in short sentences.
+
+      Warmup
+      - Easy jog/walk 10m Z1-Z2 HR
+
+      Main set 3x
+      - Steady 8m Z3 HR
+      - Easy jog/walk 2m
+
+      Cooldown
+      - Easy jog/walk 10m Z1-Z2 HR
+  - date: 2027-03-04
+    name: "10K W15 Thu - Easy run"
+    description: |
+      Easy: stay conversational; if HR goes above 140, slow down or walk until it settles.
+
+      Warmup
+      - Brisk walk 5m
+
+      Main
+      - Run easy 30m Z1-Z2 HR
+
+      Cooldown
+      - Easy walk 5m
+  - date: 2027-03-06
+    name: "10K W15 Sat - Long run"
+    description: |
+      Long aerobic session: time on feet matters, not pace. Walk 1 min whenever HR goes above 140.
+
+      Warmup
+      - Brisk walk 5m
+
+      Main
+      - Run easy 50m Z1-Z2 HR
+
+      Cooldown
+      - Easy walk 5m
+  - date: 2027-03-09
+    name: "10K W16 Tue - Steady intervals (recovery wk)"
+    description: |
+      Recovery week: less volume so the last three weeks sink in.
+
+      Warmup
+      - Easy jog/walk 10m Z1-Z2 HR
+
+      Main set 2x
+      - Steady 8m Z3 HR
+      - Easy jog/walk 2m
+
+      Cooldown
+      - Easy jog/walk 10m Z1-Z2 HR
+  - date: 2027-03-11
+    name: "10K W16 Thu - Easy run (recovery wk)"
+    description: |
+      Recovery week: less volume so the last three weeks sink in.
+
+      Warmup
+      - Brisk walk 5m
+
+      Main
+      - Run easy 25m Z1-Z2 HR
+
+      Cooldown
+      - Easy walk 5m
+  - date: 2027-03-13
+    name: "10K W16 Sat - Long run (recovery wk)"
+    description: |
+      Recovery week: less volume so the last three weeks sink in.
+
+      Warmup
+      - Brisk walk 5m
+
+      Main
+      - Run easy 35m Z1-Z2 HR
+
+      Cooldown
+      - Easy walk 5m
