@@ -8,6 +8,12 @@ Usage:
     python pipeline/push_workouts.py plans/<plan>.yaml            # create or update
     python pipeline/push_workouts.py plans/<plan>.yaml --dry-run  # show, send nothing
     python pipeline/push_workouts.py plans/<plan>.yaml --delete   # remove from calendar
+    python pipeline/push_workouts.py plans/<plan>.yaml --fit      # push, then save .fit files
+
+--fit saves each workout as a Garmin .fit file in plans/fit/<plan>/ (as exported
+by intervals.icu), for copying to the watch over USB when the Garmin Connect
+upload isn't working. Copy them into the watch's GARMIN/NewFiles folder; they
+appear under Training -> Workouts (not on the training calendar).
 
 Plan file format (YAML):
 
@@ -118,12 +124,29 @@ def delete(plan_id, events):
         print(f"deleted  {event['start_date_local'][:10]}  {event['name']}")
 
 
+FIT_DIR = Path(__file__).resolve().parent.parent / "plans" / "fit"
+
+
+def save_fit_files(plan_id, events):
+    current = existing_events(plan_id, events)
+    out_dir = FIT_DIR / plan_id
+    out_dir.mkdir(parents=True, exist_ok=True)
+    for ext_id, event in sorted(current.items()):
+        response = requests.get(f"{BASE_URL}/events/{event['id']}/downloadfit", auth=AUTH, timeout=30)
+        response.raise_for_status()
+        safe_name = "".join(c if c.isalnum() or c in " -_" else "_" for c in event["name"]).strip()
+        path = out_dir / f"{event['start_date_local'][:10]} {safe_name}.fit"
+        path.write_bytes(response.content)
+        print(f"saved    {path}")
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("plan_file")
     group = parser.add_mutually_exclusive_group()
     group.add_argument("--dry-run", action="store_true", help="print what would be sent; send nothing")
     group.add_argument("--delete", action="store_true", help="remove this plan's workouts from the calendar")
+    group.add_argument("--fit", action="store_true", help="push, then save each workout as a .fit file")
     args = parser.parse_args()
 
     plan_id, events = load_plan(args.plan_file)
@@ -138,6 +161,8 @@ def main():
         delete(plan_id, events)
     else:
         push(plan_id, events)
+        if args.fit:
+            save_fit_files(plan_id, events)
 
 
 if __name__ == "__main__":
