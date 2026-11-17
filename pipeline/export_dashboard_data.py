@@ -23,18 +23,27 @@ TABLES = {
 }
 
 
+# The dashboard is opened straight from disk (file://), where browsers block
+# fetch() of local JSON. dashboard_data.js assigns everything to
+# window.DASHBOARD_DATA so docs/index.html can load it with a <script> tag.
+JS_BUNDLE = OUTPUT_DIR / "dashboard_data.js"
+
+
 def export_table(engine, name, query):
     df = pd.read_sql(query, engine)
     output_path = OUTPUT_DIR / f"{name}.json"
     df.to_json(output_path, orient="records", date_format="iso", indent=2)
     print(f"Wrote {len(df)} rows to {output_path}")
+    return df.to_json(orient="records", date_format="iso")
 
 
 def main():
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
     engine = create_engine(DB_URL)
-    for name, query in TABLES.items():
-        export_table(engine, name, query)
+    tables_json = {name: export_table(engine, name, query) for name, query in TABLES.items()}
+    body = ",\n".join(f'  "{name}": {payload}' for name, payload in tables_json.items())
+    JS_BUNDLE.write_text(f"window.DASHBOARD_DATA = {{\n{body}\n}};\n", encoding="utf-8")
+    print(f"Wrote {JS_BUNDLE}")
 
 
 if __name__ == "__main__":

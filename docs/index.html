@@ -4,6 +4,8 @@
 <meta charset="UTF-8" />
 <title>Training Load Dashboard</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<!-- Written by pipeline/export_dashboard_data.py; works when opened from disk. -->
+<script src="data/dashboard_data.js"></script>
 <style>
   :root {
     --bg: #0f1115; --card: #1a1d24; --text: #e6e8eb; --muted: #9aa1ab;
@@ -37,11 +39,20 @@
   .calendar-header button { background: var(--card); border: 1px solid var(--border); color: var(--text); font-size: 18px; width: 32px; height: 32px; border-radius: 6px; cursor: pointer; }
   .calendar-header button:disabled { opacity: 0.35; cursor: default; }
   .calendar-header h2 { margin: 0; min-width: 180px; text-align: center; }
-  .calendar-weekdays, .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; }
+  .calendar-weekdays, .calendar-grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 6px; }
   .calendar-weekdays { margin-bottom: 6px; color: var(--muted); font-size: 12px; text-align: center; }
   .calendar-day { background: var(--card); border: 1px solid var(--border); border-radius: 8px; min-height: 88px; padding: 6px; font-size: 12px; }
   .calendar-day.empty { background: none; border: none; }
+  .calendar-day .day-head { display: flex; justify-content: space-between; align-items: baseline; gap: 4px; }
   .calendar-day .day-num { color: var(--muted); }
+  .calendar-day .weather { color: var(--muted); font-size: 11px; white-space: nowrap; }
+  .calendar-day .weather .wx-icon { font-size: 14px; }
+  @media (max-width: 640px) {
+    .calendar-day { padding: 4px; min-height: 64px; overflow: hidden; }
+    .calendar-day .day-head { flex-wrap: wrap; }
+    .calendar-day .weather .wx-temp { display: none; }
+    .calendar-day .icons { font-size: 18px; }
+  }
   .calendar-day .icons { font-size: 26px; margin-top: 6px; text-align: center; line-height: 1.3; }
   .calendar-legend { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 16px; font-size: 12px; color: var(--muted); }
   .card .sub { color: var(--muted); font-size: 12px; margin-top: 4px; }
@@ -159,6 +170,8 @@
 const DATA_BASE = "data";
 
 async function loadJSON(name) {
+  // Preferred: data bundled by the export script (works from file://).
+  if (window.DASHBOARD_DATA && window.DASHBOARD_DATA[name]) return window.DASHBOARD_DATA[name];
   const res = await fetch(`${DATA_BASE}/${name}.json`);
   if (!res.ok) throw new Error(`Failed to load ${name}.json`);
   return res.json();
@@ -257,6 +270,23 @@ const ACTIVITY_ICONS = {
 };
 const DEFAULT_ICON = "⚡";
 
+// Open-Meteo's daily weather_code is a WMO code for the most severe condition
+// of the day, so a single shower makes the whole day "rain".
+function weatherFor(code) {
+  if (code === null || code === undefined) return null;
+  if (code <= 1) return { icon: "☀️", label: "Sunny" };
+  if (code === 2) return { icon: "⛅", label: "Partly cloudy" };
+  if (code === 3) return { icon: "☁️", label: "Overcast" };
+  if (code === 45 || code === 48) return { icon: "🌫️", label: "Fog" };
+  if (code >= 51 && code <= 57) return { icon: "🌦️", label: "Drizzle" };
+  if (code >= 61 && code <= 67) return { icon: "🌧️", label: "Rain" };
+  if ((code >= 71 && code <= 77) || code === 85 || code === 86) return { icon: "🌨️", label: "Snow" };
+  if (code >= 80 && code <= 82) return { icon: "🌦️", label: "Showers" };
+  if (code >= 95) return { icon: "⛈️", label: "Thunderstorm" };
+  return null;
+}
+const WEATHER_LEGEND = [["☀️", "Sunny"], ["⛅", "Partly cloudy"], ["☁️", "Overcast"], ["🌦️", "Drizzle / showers"], ["🌧️", "Rain"], ["⛈️", "Thunderstorm"]];
+
 let calendarState = { year: null, month: null };
 let activitiesByDate = {};
 let dailyByDate = {};
@@ -306,9 +336,20 @@ function renderCalendar() {
       tooltip += "\nRest day";
     }
     if (dailyRow) tooltip += `\nCalories: ${dailyRow.total_calories ?? 0}`;
+
+    const wx = dailyRow ? weatherFor(dailyRow.weather_code) : null;
+    const hasTemps = dailyRow && dailyRow.location_temp_max_c != null && dailyRow.location_temp_min_c != null;
+    let weatherHTML = "";
+    if (wx || hasTemps) {
+      const temps = hasTemps ? `${fmt(dailyRow.location_temp_max_c)}°/${fmt(dailyRow.location_temp_min_c)}°` : "";
+      weatherHTML = `<span class="weather">${wx ? `<span class="wx-icon">${wx.icon}</span> ` : ""}<span class="wx-temp">${temps}</span></span>`;
+      tooltip += `\nWeather: ${wx ? wx.label : "—"}`;
+      if (hasTemps) tooltip += `, ${fmt(dailyRow.location_temp_max_c, 1)}° / ${fmt(dailyRow.location_temp_min_c, 1)}°C`;
+      if (dailyRow.precipitation_mm) tooltip += `, ${fmt(dailyRow.precipitation_mm, 1)} mm rain`;
+    }
     cell.title = tooltip;
 
-    cell.innerHTML = `<div class="day-num">${day}</div><div class="icons">${icons}</div>`;
+    cell.innerHTML = `<div class="day-head"><span class="day-num">${day}</span>${weatherHTML}</div><div class="icons">${icons}</div>`;
     grid.appendChild(cell);
   }
 }
@@ -758,7 +799,10 @@ async function main() {
   calendarState = { year: latestDate.getFullYear(), month: latestDate.getMonth() };
   renderCalendar();
   document.getElementById("calendar-legend").innerHTML =
-    Object.entries(ACTIVITY_ICONS).map(([type, icon]) => `<span>${icon} ${type}</span>`).join("");
+    Object.entries(ACTIVITY_ICONS).map(([type, icon]) => `<span>${icon} ${type}</span>`).join("") +
+    `<span style="flex-basis:100%;height:0"></span>` +
+    WEATHER_LEGEND.map(([icon, label]) => `<span>${icon} ${label}</span>`).join("") +
+    `<span>Temps: daily max / min °C</span>`;
 
   buildPeriodSummary({
     rows: daily,

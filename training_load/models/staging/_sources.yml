@@ -14,3 +14,6 @@ sources:
       - name: weight_log_raw
         description: One row per calendar day of weight logs, upserted on log_date.
         loaded_at_field: logged_at
+      - name: intervals_wellness_raw
+        description: One row per calendar day of intervals.icu wellness data (Fitness/Fatigue/ramp rate), upserted on wellness_date. Landed by pipeline/ingest_wellness.py. Weight and body composition come from weight_log_raw, not from here.
+        loaded_at_field: pulled_at
