@@ -1,0 +1,184 @@
+# 10K plan - Block 2 - Base 2 (wk 5-8): longer run segments, first strides.
+# Push: venv\Scripts\python.exe pipeline\push_workouts.py plans\10k\2-base2.yaml
+plan: 10k-base2
+workouts:
+  - date: 2026-12-22
+    name: "10K W5 Tue - Run/walk + strides"
+    description: |
+      Run/walk: walk breaks are part of the plan, not a failure. Short, light steps; soft surface if possible.
+
+      Warmup
+      - Brisk walk 5m
+
+      Run/walk 5x
+      - Run easy 3m Z1-Z2 HR
+      - Walk 2m
+
+      Strides 4x
+      - Relaxed pickup 15s
+      - Walk 45s
+
+      Cooldown
+      - Easy walk 5m
+  - date: 2026-12-24
+    name: "10K W5 Thu - Run/walk"
+    description: |
+      Run/walk: walk breaks are part of the plan, not a failure. Short, light steps; soft surface if possible.
+
+      Warmup
+      - Brisk walk 5m
+
+      Run/walk 5x
+      - Run easy 3m Z1-Z2 HR
+      - Walk 2m
+
+      Cooldown
+      - Easy walk 5m
+  - date: 2026-12-26
+    name: "10K W5 Sat - Long run/walk"
+    description: |
+      Long aerobic session: time on feet matters, not pace. Walk 1 min whenever HR goes above 140.
+
+      Warmup
+      - Brisk walk 5m
+
+      Run/walk 7x
+      - Run easy 3m Z1-Z2 HR
+      - Walk 2m
+
+      Cooldown
+      - Easy walk 5m
+  - date: 2026-12-29
+    name: "10K W6 Tue - Run/walk + strides"
+    description: |
+      Run/walk: walk breaks are part of the plan, not a failure. Short, light steps; soft surface if possible.
+
+      Warmup
+      - Brisk walk 5m
+
+      Run/walk 4x
+      - Run easy 4m Z1-Z2 HR
+      - Walk 90s
+
+      Strides 4x
+      - Relaxed pickup 15s
+      - Walk 45s
+
+      Cooldown
+      - Easy walk 5m
+  - date: 2026-12-31
+    name: "10K W6 Thu - Run/walk"
+    description: |
+      Run/walk: walk breaks are part of the plan, not a failure. Short, light steps; soft surface if possible.
+
+      Warmup
+      - Brisk walk 5m
+
+      Run/walk 4x
+      - Run easy 4m Z1-Z2 HR
+      - Walk 90s
+
+      Cooldown
+      - Easy walk 5m
+  - date: 2027-01-02
+    name: "10K W6 Sat - Long run/walk"
+    description: |
+      Long aerobic session: time on feet matters, not pace. Walk 1 min whenever HR goes above 140.
+
+      Warmup
+      - Brisk walk 5m
+
+      Run/walk 7x
+      - Run easy 4m Z1-Z2 HR
+      - Walk 90s
+
+      Cooldown
+      - Easy walk 5m
+  - date: 2027-01-05
+    name: "10K W7 Tue - Run/walk + strides"
+    description: |
+      Run/walk: walk breaks are part of the plan, not a failure. Short, light steps; soft surface if possible.
+
+      Warmup
+      - Brisk walk 5m
+
+      Run/walk 4x
+      - Run easy 5m Z1-Z2 HR
+      - Walk 90s
+
+      Strides 4x
+      - Relaxed pickup 15s
+      - Walk 45s
+
+      Cooldown
+      - Easy walk 5m
+  - date: 2027-01-07
+    name: "10K W7 Thu - Run/walk"
+    description: |
+      Run/walk: walk breaks are part of the plan, not a failure. Short, light steps; soft surface if possible.
+
+      Warmup
+      - Brisk walk 5m
+
+      Run/walk 4x
+      - Run easy 5m Z1-Z2 HR
+      - Walk 90s
+
+      Cooldown
+      - Easy walk 5m
+  - date: 2027-01-09
+    name: "10K W7 Sat - Long run/walk"
+    description: |
+      Long aerobic session: time on feet matters, not pace. Walk 1 min whenever HR goes above 140.
+
+      Warmup
+      - Brisk walk 5m
+
+      Run/walk 6x
+      - Run easy 5m Z1-Z2 HR
+      - Walk 90s
+
+      Cooldown
+      - Easy walk 5m
+  - date: 2027-01-12
+    name: "10K W8 Tue - Run/walk (recovery wk)"
+    description: |
+      Recovery week: less volume so the last three weeks sink in.
+
+      Warmup
+      - Brisk walk 5m
+
+      Run/walk 4x
+      - Run easy 4m Z1-Z2 HR
+      - Walk 90s
+
+      Cooldown
+      - Easy walk 5m
+  - date: 2027-01-14
+    name: "10K W8 Thu - Run/walk (recovery wk)"
+    description: |
+      Recovery week: less volume so the last three weeks sink in.
+
+      Warmup
+      - Brisk walk 5m
+
+      Run/walk 4x
+      - Run easy 4m Z1-Z2 HR
+      - Walk 90s
+
+      Cooldown
+      - Easy walk 5m
+  - date: 2027-01-16
+    name: "10K W8 Sat - Long run/walk (recovery wk)"
+    description: |
+      Recovery week: less volume so the last three weeks sink in.
+
+      Warmup
+      - Brisk walk 5m
+
+      Run/walk 5x
+      - Run easy 4m Z1-Z2 HR
+      - Walk 90s
+
+      Cooldown
+      - Easy walk 5m

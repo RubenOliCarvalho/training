@@ -1,0 +1,172 @@
+# 10K plan - Block 1 - Base 1 (wk 1-4): impact tolerance and habit; run/walk with HR cap.
+# Push: venv\Scripts\python.exe pipeline\push_workouts.py plans\10k\1-base1.yaml
+plan: 10k-base1
+workouts:
+  - date: 2026-11-24
+    name: "10K W1 Tue - Run/walk"
+    description: |
+      Run/walk: walk breaks are part of the plan, not a failure. Short, light steps; soft surface if possible.
+
+      Warmup
+      - Brisk walk 5m
+
+      Run/walk 8x
+      - Run easy 1m Z1-Z2 HR
+      - Walk 2m
+
+      Cooldown
+      - Easy walk 5m
+  - date: 2026-11-26
+    name: "10K W1 Thu - Run/walk"
+    description: |
+      Run/walk: walk breaks are part of the plan, not a failure. Short, light steps; soft surface if possible.
+
+      Warmup
+      - Brisk walk 5m
+
+      Run/walk 7x
+      - Run easy 1m Z1-Z2 HR
+      - Walk 2m
+
+      Cooldown
+      - Easy walk 5m
+  - date: 2026-11-28
+    name: "10K W1 Sat - Long run/walk"
+    description: |
+      Long aerobic session: time on feet matters, not pace. Walk 1 min whenever HR goes above 140.
+
+      Warmup
+      - Brisk walk 5m
+
+      Run/walk 10x
+      - Run easy 1m Z1-Z2 HR
+      - Walk 2m
+
+      Cooldown
+      - Easy walk 5m
+  - date: 2026-12-01
+    name: "10K W2 Tue - Run/walk"
+    description: |
+      Run/walk: walk breaks are part of the plan, not a failure. Short, light steps; soft surface if possible.
+
+      Warmup
+      - Brisk walk 5m
+
+      Run/walk 7x
+      - Run easy 90s Z1-Z2 HR
+      - Walk 2m
+
+      Cooldown
+      - Easy walk 5m
+  - date: 2026-12-03
+    name: "10K W2 Thu - Run/walk"
+    description: |
+      Run/walk: walk breaks are part of the plan, not a failure. Short, light steps; soft surface if possible.
+
+      Warmup
+      - Brisk walk 5m
+
+      Run/walk 6x
+      - Run easy 90s Z1-Z2 HR
+      - Walk 2m
+
+      Cooldown
+      - Easy walk 5m
+  - date: 2026-12-05
+    name: "10K W2 Sat - Long run/walk"
+    description: |
+      Long aerobic session: time on feet matters, not pace. Walk 1 min whenever HR goes above 140.
+
+      Warmup
+      - Brisk walk 5m
+
+      Run/walk 9x
+      - Run easy 90s Z1-Z2 HR
+      - Walk 2m
+
+      Cooldown
+      - Easy walk 5m
+  - date: 2026-12-08
+    name: "10K W3 Tue - Run/walk"
+    description: |
+      Run/walk: walk breaks are part of the plan, not a failure. Short, light steps; soft surface if possible.
+
+      Warmup
+      - Brisk walk 5m
+
+      Run/walk 7x
+      - Run easy 2m Z1-Z2 HR
+      - Walk 2m
+
+      Cooldown
+      - Easy walk 5m
+  - date: 2026-12-10
+    name: "10K W3 Thu - Run/walk"
+    description: |
+      Run/walk: walk breaks are part of the plan, not a failure. Short, light steps; soft surface if possible.
+
+      Warmup
+      - Brisk walk 5m
+
+      Run/walk 6x
+      - Run easy 2m Z1-Z2 HR
+      - Walk 2m
+
+      Cooldown
+      - Easy walk 5m
+  - date: 2026-12-12
+    name: "10K W3 Sat - Long run/walk"
+    description: |
+      Long aerobic session: time on feet matters, not pace. Walk 1 min whenever HR goes above 140.
+
+      Warmup
+      - Brisk walk 5m
+
+      Run/walk 9x
+      - Run easy 2m Z1-Z2 HR
+      - Walk 2m
+
+      Cooldown
+      - Easy walk 5m
+  - date: 2026-12-15
+    name: "10K W4 Tue - Run/walk (recovery wk)"
+    description: |
+      Recovery week: less volume so the last three weeks sink in.
+
+      Warmup
+      - Brisk walk 5m
+
+      Run/walk 6x
+      - Run easy 90s Z1-Z2 HR
+      - Walk 2m
+
+      Cooldown
+      - Easy walk 5m
+  - date: 2026-12-17
+    name: "10K W4 Thu - Run/walk (recovery wk)"
+    description: |
+      Recovery week: less volume so the last three weeks sink in.
+
+      Warmup
+      - Brisk walk 5m
+
+      Run/walk 5x
+      - Run easy 90s Z1-Z2 HR
+      - Walk 2m
+
+      Cooldown
+      - Easy walk 5m
+  - date: 2026-12-19
+    name: "10K W4 Sat - Long run/walk (recovery wk)"
+    description: |
+      Recovery week: less volume so the last three weeks sink in.
+
+      Warmup
+      - Brisk walk 5m
+
+      Run/walk 7x
+      - Run easy 90s Z1-Z2 HR
+      - Walk 2m
+
+      Cooldown
+      - Easy walk 5m
