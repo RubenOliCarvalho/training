@@ -37,7 +37,8 @@ Old recursive EWMA model is in git history.
 Workflow: Ruben describes a session in plain words -> Claude writes it as intervals.icu workout text in `plans/<plan>.yaml` -> `venv/Scripts/python.exe pipeline/push_workouts.py plans/<plan>.yaml` creates/updates WORKOUT events on the intervals.icu calendar (external_id `<plan>-<date>-<n>`, so re-pushing updates; `--dry-run`, `--delete`) -> intervals.icu uploads to Garmin Connect -> watch.
 - Target device: Forerunner 165. Whether Garmin Connect also syncs to his other Garmin is UNVERIFIED.
 - Targets: use HR zones (`Z2 HR` etc.). No run threshold pace is set in intervals.icu, so pace targets won't resolve. Zones: LTHR 157, max 173, Z1 <=132, Z2 133-140, Z3 141-148, Z4 149-156.
-- 18 Nov: `icu_garmin_upload_workouts` and `icu_garmin_training` were both false; Ruben is enabling "Upload planned workouts". If uploads don't arrive, reconnect Garmin with the workout/training permission (UNVERIFIED cause). Check with GET /athlete/0 (`icu_garmin_upload_workouts`, `icu_garmin_last_upload`).
+- Garmin upload is ON (`icu_garmin_upload_workouts`, `icu_garmin_training` true since 18 Nov). Verified 18 Nov: the 19 Nov drills workout reached Garmin Connect; the 24 Nov+ 10K workouts were sent in the same upload with no `push_errors` but are not in Connect yet. Most likely intervals.icu only uploads a short look-ahead window (< 6 days; exact length UNVERIFIED). Expect each workout to appear a few days before its date; confirm the 24 Nov one shows up by ~23 Nov.
+- Fallback: `push_workouts.py <plan> --fit` saves .fit files to `plans/fit/<plan>/` for USB copy to GARMIN/NewFiles (shows under Workouts, not the calendar; untested on the FR165).
 - Push output reports how many steps intervals.icu parsed; 0 steps means the description syntax is wrong.
 - Running base is small (6 runs, ~30 km in 2026, ~8-12 min/km): keep sessions conservative unless he asks otherwise.
 
