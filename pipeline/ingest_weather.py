@@ -1,5 +1,5 @@
 import os
-from datetime import date
+from datetime import date, timedelta
 from dotenv import load_dotenv
 import requests
 import psycopg2
@@ -25,22 +25,33 @@ def get_earliest_activity_date(conn):
         return cur.fetchone()[0]
 
 
+# The archive API's latest available date lags real time and moves during the
+# day (sometimes today, sometimes only yesterday). Ask for today first and fall
+# back a day at a time if the end date is rejected as out of range.
+MAX_END_DATE_FALLBACK_DAYS = 3
+
+
 def fetch_weather(conn):
-    end = date.today()
     start = get_earliest_activity_date(conn)
-    response = requests.get(
-        "https://archive-api.open-meteo.com/v1/archive",
-        params={
-            "latitude": LATITUDE,
-            "longitude": LONGITUDE,
-            "start_date": start.isoformat(),
-            "end_date": end.isoformat(),
-            "daily": "temperature_2m_max,temperature_2m_min,precipitation_sum,wind_speed_10m_max",
-            "timezone": "Africa/Johannesburg",
-        },
-    )
+    for days_back in range(MAX_END_DATE_FALLBACK_DAYS + 1):
+        end = date.today() - timedelta(days=days_back)
+        response = requests.get(
+            "https://archive-api.open-meteo.com/v1/archive",
+            params={
+                "latitude": LATITUDE,
+                "longitude": LONGITUDE,
+                "start_date": start.isoformat(),
+                "end_date": end.isoformat(),
+                "daily": "temperature_2m_max,temperature_2m_min,precipitation_sum,wind_speed_10m_max,weather_code",
+                "timezone": "Africa/Johannesburg",
+            },
+            timeout=60,
+        )
+        if response.status_code == 400 and "end_date" in response.text:
+            continue
+        response.raise_for_status()
+        return response.json()
     response.raise_for_status()
-    return response.json()
 
 
 def upsert_weather(conn, data):
@@ -74,6 +85,9 @@ def upsert_weather(conn, data):
             "temperature_2m_min": daily["temperature_2m_min"][i],
             "precipitation_sum": daily["precipitation_sum"][i],
             "wind_speed_10m_max": daily["wind_speed_10m_max"][i],
+            # WMO weather code (most severe condition of the day); read from
+            # raw_json in stg_weather_daily, so no table column is needed.
+            "weather_code": daily["weather_code"][i],
         }
         cur.execute(upsert_sql, {
             "date": day,

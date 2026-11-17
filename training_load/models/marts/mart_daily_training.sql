@@ -115,6 +115,7 @@ select
     fw.temp_min_c as location_temp_min_c,
     fw.precipitation_mm,
     fw.wind_speed_max_kmh,
+    fw.weather_code,
     g.garmin_avg_temp_c,
     g.garmin_min_temp_c,
     g.garmin_max_temp_c,
