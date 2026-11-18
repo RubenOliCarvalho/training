@@ -8,7 +8,9 @@ Personal training-load dashboard for Ruben. Read this first. Everything marked U
 - Code (SQL/Python) should be correct, readable, production-minded, with edge cases and validation checks called out.
 
 ## Architecture
-intervals.icu API -> Python ingest (`pipeline/`) -> Postgres `staging` schema -> dbt (`training_load/`) -> `analytics` marts -> `pipeline/export_dashboard_data.py` writes JSON plus `docs/data/dashboard_data.js` to `docs/data/` -> static dashboard `docs/index.html`, opened locally from disk (`open_dashboard.bat`). LOCAL ONLY since 18 Nov 2026: nothing is published; the GitHub repo/Pages site is being deleted at Ruben's request (contains personal body data). Don't add any publishing, pushing or hosting back.
+intervals.icu API -> Python ingest (`pipeline/`) -> Postgres `staging` schema -> dbt (`training_load/`) -> `analytics` marts -> `pipeline/export_dashboard_data.py` writes JSON plus `docs/data/dashboard_data.js` to `docs/data/` -> static dashboard `docs/index.html`, opened locally from disk (`open_dashboard.bat`).
+- Git remote: `origin` = https://github.com/RubenOliCarvalho/training (PUBLIC; local `master` -> remote `main`). On 18 Nov 2026 Ruben chose to push the whole project and full history there publicly, knowing it includes his weight/body-fat/muscle-mass data (the earlier `training-load-forecast` repo was deleted for that reason, then he reversed course). No GitHub Pages hosting is set up. `run_pipeline.py` still does not commit or push; only push when he asks.
+- Before any push: confirm no credentials are tracked (`.env`, `training_load/profiles.yml` are gitignored; history scanned clean on 18 Nov 2026).
 - `run_pipeline.py` runs everything in order: ingest_intervals, ingest_wellness (new), ingest_weather, dbt seed, dbt run, dbt test, export. No git steps; it does not commit or push.
 - Windows project. Python/dbt live in `venv/Scripts/`. Credentials are in `.env`; never read, print or commit it.
 - Weight tooling: `log_weight.bat` -> `pipeline/log_weight.py` (manual entry).
