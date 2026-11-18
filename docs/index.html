@@ -780,7 +780,15 @@ async function main() {
       labels: runActs.map(a => a.activity_date.slice(0, 10)),
       datasets: [lineDataset("Pace (min/km)", runActs.map(a => a.pace_min_per_km), "#f5a623", { showLine: true, pointRadius: 3 })],
     },
-    options: { responsive: true, maintainAspectRatio: false, scales: { y: { reverse: true } }, plugins: { title: { display: true, text: "Running pace trend (lower is faster)" } } },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      // Pace is stored as decimal minutes; show it as min:sec on the axis and in tooltips.
+      scales: { y: { reverse: true, ticks: { callback: v => formatPace(v).replace(" /km", "") } } },
+      plugins: {
+        title: { display: true, text: "Running pace trend (min:sec per km, lower is faster)" },
+        tooltip: { callbacks: { label: ctx => `Pace: ${formatPace(ctx.parsed.y)}` } },
+      },
+    },
   });
 
   buildTable(document.getElementById("activities-table"), activities, [
