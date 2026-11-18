@@ -34,14 +34,55 @@ def run_step(name, args, cwd):
     return True
 
 
-def export_dashboard_data():
-    # Local only: the dashboard is opened from docs/index.html on this machine.
-    # Nothing is committed or pushed anywhere.
-    return run_step(
+def publish_dashboard_data():
+    if not run_step(
         "export_dashboard_data",
         [str(PYTHON), "pipeline/export_dashboard_data.py"],
         cwd=PROJECT_ROOT,
+    ):
+        return False
+
+    logging.info("Starting: git add docs/data")
+    add_result = subprocess.run(
+        ["git", "add", "docs/data"], cwd=PROJECT_ROOT, capture_output=True, text=True
     )
+    if add_result.returncode != 0:
+        logging.error(f"git add FAILED: {add_result.stderr}")
+        return False
+
+    # Check directly whether anything under docs/data was actually staged,
+    # independent of whatever else may be sitting unstaged/untracked
+    # elsewhere in the working tree (e.g. edits you're mid-way through).
+    diff_result = subprocess.run(
+        ["git", "diff", "--cached", "--quiet", "--", "docs/data"],
+        cwd=PROJECT_ROOT,
+    )
+    if diff_result.returncode == 0:
+        logging.info("No dashboard data changes to commit — skipping commit and push.")
+        return True
+
+    logging.info("Starting: git commit")
+    commit_result = subprocess.run(
+        ["git", "commit", "-m", f"Update dashboard data ({datetime.now():%Y-%m-%d %H:%M})",
+         "--", "docs/data"],
+        cwd=PROJECT_ROOT,
+        capture_output=True,
+        text=True,
+    )
+    if commit_result.returncode != 0:
+        logging.error(f"git commit FAILED: {commit_result.stdout} {commit_result.stderr}")
+        return False
+
+    logging.info("Starting: git push")
+    push_result = subprocess.run(
+        ["git", "push"], cwd=PROJECT_ROOT, capture_output=True, text=True
+    )
+    if push_result.returncode != 0:
+        logging.error(f"git push FAILED: {push_result.stderr}")
+        return False
+
+    logging.info("Dashboard data committed and pushed successfully.")
+    return True
 
 
 def main():
@@ -89,8 +130,8 @@ def main():
         cwd=DBT_PROJECT_DIR,
     )
 
-    print("Exporting dashboard data...")
-    steps_ok &= export_dashboard_data()
+    print("Publishing dashboard data...")
+    steps_ok &= publish_dashboard_data()
 
     if steps_ok:
         print(f"Done — pipeline completed successfully. Log: {log_file}")
