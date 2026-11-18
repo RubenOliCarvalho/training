@@ -1,0 +1,18 @@
+# Saturday before the 10K plan starts (Tue 24 Nov): easy run/walk rehearsal.
+# Push: venv\Scripts\python.exe pipeline\push_workouts.py plans\pre-10k.yaml --fit
+plan: pre-10k
+workouts:
+  - date: 2026-11-21
+    name: "Pre-10K - Easy run/walk"
+    description: |
+      Rehearsal for week 1: very easy jogging with walk breaks. Keep HR at or below 140 on the jogs; if the watch alerts, slow down or walk until it settles. No drills or strides today; fatigue is high after this week's drills, tennis and ride.
+
+      Warmup
+      - Brisk walk 5m
+
+      Run/walk 6x
+      - Run easy 1m Z1-Z2 HR
+      - Walk 2m
+
+      Cooldown
+      - Easy walk 5m
