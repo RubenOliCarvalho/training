@@ -18,3 +18,6 @@ Thumbs.db
 .ipynb_checkpoints/
 # Generated workout files (pipeline/push_workouts.py --fit)
 plans/fit/
+
+# Claude Code project notes: local only
+CLAUDE.md
