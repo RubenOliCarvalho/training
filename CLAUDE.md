@@ -40,6 +40,8 @@ Workflow: Ruben describes a session in plain words -> Claude writes it as interv
 - Garmin upload is ON (`icu_garmin_upload_workouts`, `icu_garmin_training` true since 18 Nov). Verified 18 Nov: the 19 Nov drills workout reached Garmin Connect; the 24 Nov+ 10K workouts were sent in the same upload with no `push_errors` but are not in Connect yet. Most likely intervals.icu only uploads a short look-ahead window (< 6 days; exact length UNVERIFIED). Expect each workout to appear a few days before its date; confirm the 24 Nov one shows up by ~23 Nov.
 - Fallback: `push_workouts.py <plan> --fit` saves .fit files to `plans/fit/<plan>/` for USB copy to GARMIN/NewFiles (shows under Workouts, not the calendar; untested on the FR165).
 - Push output reports how many steps intervals.icu parsed; 0 steps means the description syntax is wrong.
+- Step syntax: label BEFORE the duration (`- H Knees 20s`), otherwise the label is dropped. Keep labels short (H Knees, B Kicks, Skip, Carioca R/L, Strides).
+- Ruben's rule: drills and strides are ALWAYS time-based (e.g. 20s), never distance (`50mtr`) or lap-press (`Press lap`), even if the source session gives metres.
 - Running base is small (6 runs, ~30 km in 2026, ~8-12 min/km): keep sessions conservative unless he asks otherwise.
 
 ## 10K plan (created 18 Nov 2026)
