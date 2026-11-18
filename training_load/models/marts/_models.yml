@@ -26,3 +26,18 @@ models:
     columns:
       - name: activity_id
         tests: [unique, not_null]
+  - name: mart_monthly_zone_times
+    description: Seconds/hours/% per heart-rate and power zone per month (from intervals.icu zone times).
+    columns:
+      - name: zone_key
+        tests: [unique, not_null]
+      - name: zone_type
+        tests:
+          - accepted_values:
+              arguments:
+                values: ['hr', 'power']
+  - name: mart_yearly_zone_times
+    description: Seconds/hours/% per heart-rate and power zone per year (from intervals.icu zone times).
+    columns:
+      - name: zone_key
+        tests: [unique, not_null]

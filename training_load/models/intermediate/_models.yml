@@ -23,3 +23,13 @@ models:
         tests: [not_null]
       - name: tsb
         description: Form = ctl - atl for the same date, matching how intervals.icu displays it. Previously this was the prior day's ctl minus atl, so values shift by about a day.
+  - name: int_activity_zone_times
+    description: One row per activity and zone with seconds in that heart-rate or power zone, unpacked from intervals.icu's icu_hr_zone_times / icu_zone_times. Power includes SS (sweet spot), which overlaps Z3/Z4.
+    columns:
+      - name: activity_zone_key
+        tests: [unique, not_null]
+      - name: zone
+        tests:
+          - accepted_values:
+              arguments:
+                values: ['Z1', 'Z2', 'Z3', 'Z4', 'Z5', 'Z6', 'Z7', 'SS']

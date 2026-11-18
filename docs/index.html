@@ -58,6 +58,15 @@
   .card .sub { color: var(--muted); font-size: 12px; margin-top: 4px; }
   .section-note { color: var(--muted); font-size: 13px; text-align: center; margin: -8px 0 16px; }
   h3.section-title { font-size: 14px; font-weight: 500; color: var(--muted); margin: 0 0 10px; }
+  .zones { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px; margin-bottom: 20px; }
+  .zone-panel h4 { margin: 0 0 10px; font-size: 14px; text-align: center; }
+  .zone-row { display: grid; grid-template-columns: 28px 1fr 64px 48px; align-items: center; gap: 8px; font-size: 13px; margin: 6px 0; }
+  .zone-row .zone-label { color: var(--muted); }
+  .zone-row .zone-track { background: var(--border); border-radius: 4px; height: 12px; overflow: hidden; }
+  .zone-row .zone-fill { height: 100%; border-radius: 4px; }
+  .zone-row .zone-time { font-weight: 600; text-align: right; font-variant-numeric: tabular-nums; }
+  .zone-row .zone-pct { color: var(--muted); text-align: right; font-variant-numeric: tabular-nums; }
+  .zone-empty { color: var(--muted); font-size: 13px; text-align: center; padding: 12px 0; }
 </style>
 </head>
 <body>
@@ -117,6 +126,7 @@
       <button id="month-summary-next">›</button>
     </div>
     <div class="cards" id="month-summary-cards"></div>
+    <div class="zones" id="month-zones"></div>
 
     <div class="chart-box"><canvas id="monthly-chart"></canvas></div>
     <div class="chart-box"><canvas id="monthly-minutes-chart"></canvas></div>
@@ -134,6 +144,9 @@
 
     <h3 class="section-title">Highlights</h3>
     <div class="cards" id="year-highlight-cards"></div>
+
+    <h3 class="section-title">Time in zones</h3>
+    <div class="zones" id="year-zones"></div>
 
     <div class="chart-box"><canvas id="yearly-hours-chart"></canvas></div>
     <h3 class="section-title">By activity type</h3>
@@ -562,9 +575,42 @@ function cardsHTML(cards) {
   ).join("");
 }
 
+// Same zone colours intervals.icu uses, so the bars read the same as its panel.
+const ZONE_COLORS = {
+  Z1: "#1a9e86", Z2: "#13a10e", Z3: "#d4b21c", Z4: "#e07b1a", Z5: "#d81b60",
+  Z6: "#6a3db8", Z7: "#55595f", SS: "#e08a1a",
+};
+
+function formatZoneTime(secs) {
+  const s = Math.round(secs || 0);
+  const h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60), sec = s % 60;
+  return h > 0 ? `${h}h${m}m` : `${m}m${sec}s`;
+}
+
+// rows: zone-times mart rows for one period and one zone_type.
+function zonePanelHTML(title, rows) {
+  const zones = rows.filter(r => Number(r.secs) > 0 || r.zone !== "SS")
+    .sort((a, b) => (a.zone === "SS") - (b.zone === "SS") || a.zone.localeCompare(b.zone));
+  const total = zones.reduce((t, r) => t + (r.zone === "SS" ? 0 : Number(r.secs)), 0);
+  if (!total) return `<div class="card zone-panel"><h4>${title}</h4><div class="zone-empty">No ${title.toLowerCase()} data for this period</div></div>`;
+  const max = Math.max(...zones.map(r => Number(r.secs)));
+  return `<div class="card zone-panel"><h4>${title}</h4>${zones.map(r => `
+    <div class="zone-row" title="${r.zone}: ${formatZoneTime(r.secs)} (${(Number(r.secs) / total * 100).toFixed(1)}%)">
+      <span class="zone-label">${r.zone}</span>
+      <span class="zone-track"><span class="zone-fill" style="display:block;width:${(Number(r.secs) / max) * 100}%;background:${ZONE_COLORS[r.zone] || "var(--accent)"}"></span></span>
+      <span class="zone-time">${formatZoneTime(r.secs)}</span>
+      <span class="zone-pct">${(Number(r.secs) / total * 100).toFixed(1)}%</span>
+    </div>`).join("")}</div>`;
+}
+
+function renderZones(el, rows) {
+  el.innerHTML = zonePanelHTML("Power Zones", rows.filter(r => r.zone_type === "power")) +
+    zonePanelHTML("Heart Rate Zones", rows.filter(r => r.zone_type === "hr"));
+}
+
 let yearlyHoursChart = null;
 
-function renderYearDetails(row, acts, { daily, weekly, monthly }) {
+function renderYearDetails(row, acts, { daily, weekly, monthly, zonesYearly }) {
   const year = String(row.year);
   const yearDaily = daily.filter(d => d.calendar_date.startsWith(year));
   const yearWeekly = weekly.filter(w => w.week_start.startsWith(year));
@@ -576,6 +622,7 @@ function renderYearDetails(row, acts, { daily, weekly, monthly }) {
   document.getElementById("year-summary-note").textContent = notes.join(" · ");
 
   document.getElementById("year-highlight-cards").innerHTML = cardsHTML(yearHighlightCards(acts, yearDaily, yearWeekly));
+  renderZones(document.getElementById("year-zones"), zonesYearly.filter(z => z.year === row.year));
 
   if (yearlyHoursChart) yearlyHoursChart.destroy();
   yearlyHoursChart = new Chart(document.getElementById("yearly-hours-chart"), {
@@ -624,8 +671,9 @@ function buildPeriodSummary({ rows, activities, dateFilter, formatLabel, buildCa
 }
 
 async function main() {
-  const [daily, weekly, monthly, yearly, activities] = await Promise.all([
+  const [daily, weekly, monthly, yearly, activities, zonesMonthly, zonesYearly] = await Promise.all([
     loadJSON("daily"), loadJSON("weekly"), loadJSON("monthly"), loadJSON("yearly"), loadJSON("activities"),
+    loadJSON("zones_monthly"), loadJSON("zones_yearly"),
   ]);
 
   document.getElementById("subtitle").textContent =
@@ -849,6 +897,8 @@ async function main() {
     dateFilter: (row, a) => a.activity_date.slice(0, 7) === row.month.slice(0, 7),
     formatLabel: row => formatMonthLabel(row.month),
     buildCards: monthlySummaryCards,
+    onRender: row => renderZones(document.getElementById("month-zones"),
+      zonesMonthly.filter(z => z.month.slice(0, 7) === row.month.slice(0, 7))),
     els: {
       prev: document.getElementById("month-summary-prev"),
       next: document.getElementById("month-summary-next"),
@@ -863,7 +913,7 @@ async function main() {
     dateFilter: (row, a) => a.activity_date.slice(0, 4) === String(row.year),
     formatLabel: row => String(row.year),
     buildCards: yearlySummaryCards,
-    onRender: (row, acts) => renderYearDetails(row, acts, { daily, weekly, monthly }),
+    onRender: (row, acts) => renderYearDetails(row, acts, { daily, weekly, monthly, zonesYearly }),
     els: {
       prev: document.getElementById("year-summary-prev"),
       next: document.getElementById("year-summary-next"),

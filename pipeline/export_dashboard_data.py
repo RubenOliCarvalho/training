@@ -19,6 +19,8 @@ TABLES = {
     "weekly": "select * from analytics.mart_weekly_training order by week_start",
     "monthly": "select * from analytics.mart_monthly_training order by month",
     "yearly": "select * from analytics.mart_yearly_training order by year",
+    "zones_monthly": "select * from analytics.mart_monthly_zone_times order by month, zone_type, zone",
+    "zones_yearly": "select * from analytics.mart_yearly_zone_times order by year, zone_type, zone",
     "activities": "select * from analytics.mart_activity_diary order by start_date_local desc",
 }
 
