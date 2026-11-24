@@ -35,19 +35,19 @@ workouts:
       Cooldown
       - Cool down 10m 45% 85rpm
   - date: 2026-11-25
-    name: "Bike W1 Wed - Endurance + spin-ups"
+    name: "Bike W1 Wed - Endurance + FastPedal"
     type: VirtualRide
     description: |
-      Aerobic endurance: conversational, steady. Spin-ups: smooth, quiet upper body, no bouncing.
+      Aerobic endurance (EnduranceMiles): conversational, steady; you could ride like this for hours. Ride to heart rate: if HR goes above 140, let the watts drop until it settles. FastPedal: high cadence, smooth and quiet upper body, no bouncing.
 
       Warmup
       - Warm up 10m ramp 45%-65% 90rpm
 
-      - Endurance 25m 65% 85-95rpm
+      - Endurance 12m 62% 85-95rpm
 
-      Spin-ups 4x
-      - Spin 30s 60% 105-110rpm
-      - Easy 90s 55% 90rpm
+      FastPedal 3x
+      - FastPedal 1m 58% 100-110rpm
+      - Easy 2m 55% 85-90rpm
 
       Cooldown
       - Cool down 5m ramp 60%-45% 85rpm
@@ -55,50 +55,44 @@ workouts:
     name: "Bike W1 Fri - Endurance"
     type: VirtualRide
     description: |
-      Aerobic endurance: conversational, steady. Spin-ups: smooth, quiet upper body, no bouncing.
+      Aerobic endurance (EnduranceMiles): conversational, steady; you could ride like this for hours. Ride to heart rate: if HR goes above 140, let the watts drop until it settles. FastPedal: high cadence, smooth and quiet upper body, no bouncing.
 
       Warmup
       - Warm up 10m ramp 45%-65% 90rpm
 
-      - Endurance 35m 65% 85-95rpm
+      - Endurance 25m 62% 85-95rpm
 
       Cooldown
       - Cool down 5m ramp 60%-45% 85rpm
   - date: 2026-11-30
-    name: "Bike W2 Mon - Endurance + spin-ups"
+    name: "Bike W2 Mon - Endurance + FastPedal"
     type: VirtualRide
     description: |
-      Aerobic endurance: conversational, steady. Spin-ups: smooth, quiet upper body, no bouncing.
+      Aerobic endurance (EnduranceMiles): conversational, steady; you could ride like this for hours. Ride to heart rate: if HR goes above 140, let the watts drop until it settles. FastPedal: high cadence, smooth and quiet upper body, no bouncing.
 
       Warmup
       - Warm up 10m ramp 45%-65% 90rpm
 
-      - Endurance 20m 65% 85-95rpm
+      - Endurance 15m 62% 85-95rpm
 
-      Spin-ups 6x
-      - Spin 30s 60% 105-110rpm
-      - Easy 90s 55% 90rpm
+      FastPedal 4x
+      - FastPedal 1m 58% 100-110rpm
+      - Easy 2m 55% 85-90rpm
 
       - Endurance 3m 65% 85-95rpm
 
       Cooldown
       - Cool down 5m ramp 60%-45% 85rpm
   - date: 2026-12-02
-    name: "Bike W2 Wed - Force / climbing"
+    name: "Bike W2 Wed - Endurance"
     type: VirtualRide
     description: |
-      Force (seated climbing): low cadence, high torque. Stay seated, steady pedal stroke; stop a rep if knees complain.
+      Aerobic endurance (EnduranceMiles): conversational, steady; you could ride like this for hours. Ride to heart rate: if HR goes above 140, let the watts drop until it settles. FastPedal: high cadence, smooth and quiet upper body, no bouncing.
 
       Warmup
       - Warm up 10m ramp 45%-65% 90rpm
 
-      - Endurance 10m 65% 85-95rpm
-
-      Force 5x
-      - Climb 1m 80% 60rpm
-      - Easy 2m 55% 90rpm
-
-      - Endurance 10m 65% 85-95rpm
+      - Endurance 25m 63% 85-95rpm
 
       Cooldown
       - Cool down 5m ramp 60%-45% 85rpm
@@ -106,48 +100,42 @@ workouts:
     name: "Bike W2 Fri - Endurance"
     type: VirtualRide
     description: |
-      Aerobic endurance: conversational, steady. Spin-ups: smooth, quiet upper body, no bouncing.
+      Aerobic endurance (EnduranceMiles): conversational, steady; you could ride like this for hours. Ride to heart rate: if HR goes above 140, let the watts drop until it settles. FastPedal: high cadence, smooth and quiet upper body, no bouncing.
 
       Warmup
       - Warm up 10m ramp 45%-65% 90rpm
 
-      - Endurance 40m 67% 85-95rpm
+      - Endurance 30m 63% 85-95rpm
 
       Cooldown
       - Cool down 5m ramp 60%-45% 85rpm
   - date: 2026-12-07
-    name: "Bike W3 Mon - Endurance + spin-ups"
+    name: "Bike W3 Mon - Endurance + FastPedal"
     type: VirtualRide
     description: |
-      Aerobic endurance: conversational, steady. Spin-ups: smooth, quiet upper body, no bouncing.
+      Aerobic endurance (EnduranceMiles): conversational, steady; you could ride like this for hours. Ride to heart rate: if HR goes above 140, let the watts drop until it settles. FastPedal: high cadence, smooth and quiet upper body, no bouncing.
 
       Warmup
       - Warm up 10m ramp 45%-65% 90rpm
 
-      - Endurance 25m 65% 85-95rpm
+      - Endurance 15m 63% 85-95rpm
 
-      Spin-ups 8x
-      - Spin 30s 60% 105-110rpm
-      - Easy 90s 55% 90rpm
+      FastPedal 4x
+      - FastPedal 2m 58% 100-110rpm
+      - Easy 3m 55% 85-90rpm
 
       Cooldown
       - Cool down 5m ramp 60%-45% 85rpm
   - date: 2026-12-09
-    name: "Bike W3 Wed - Force / climbing"
+    name: "Bike W3 Wed - Endurance"
     type: VirtualRide
     description: |
-      Force (seated climbing): low cadence, high torque. Stay seated, steady pedal stroke; stop a rep if knees complain.
+      Aerobic endurance (EnduranceMiles): conversational, steady; you could ride like this for hours. Ride to heart rate: if HR goes above 140, let the watts drop until it settles. FastPedal: high cadence, smooth and quiet upper body, no bouncing.
 
       Warmup
       - Warm up 10m ramp 45%-65% 90rpm
 
-      - Endurance 8m 65% 85-95rpm
-
-      Force 6x
-      - Climb 2m 80% 60rpm
-      - Easy 2m 55% 90rpm
-
-      - Endurance 8m 65% 85-95rpm
+      - Endurance 30m 65% 85-95rpm
 
       Cooldown
       - Cool down 5m ramp 60%-45% 85rpm
@@ -155,12 +143,12 @@ workouts:
     name: "Bike W3 Fri - Endurance"
     type: VirtualRide
     description: |
-      Aerobic endurance: conversational, steady. Spin-ups: smooth, quiet upper body, no bouncing.
+      Aerobic endurance (EnduranceMiles): conversational, steady; you could ride like this for hours. Ride to heart rate: if HR goes above 140, let the watts drop until it settles. FastPedal: high cadence, smooth and quiet upper body, no bouncing.
 
       Warmup
       - Warm up 10m ramp 45%-65% 90rpm
 
-      - Endurance 45m 68% 85-95rpm
+      - Endurance 35m 65% 85-95rpm
 
       Cooldown
       - Cool down 5m ramp 60%-45% 85rpm
@@ -173,7 +161,7 @@ workouts:
       Warmup
       - Warm up 10m ramp 45%-65% 90rpm
 
-      - Endurance 25m 60% 85-95rpm
+      - Endurance 15m 58% 85-95rpm
 
       Cooldown
       - Cool down 5m ramp 60%-45% 85rpm
@@ -186,11 +174,11 @@ workouts:
       Warmup
       - Warm up 10m ramp 45%-65% 90rpm
 
-      - Endurance 20m 60% 85-95rpm
+      - Endurance 15m 58% 85-95rpm
 
-      Spin-ups 4x
-      - Spin 30s 60% 105-110rpm
-      - Easy 90s 55% 90rpm
+      FastPedal 3x
+      - FastPedal 1m 58% 100-110rpm
+      - Easy 2m 55% 85-90rpm
 
       Cooldown
       - Cool down 5m ramp 60%-45% 85rpm
@@ -203,7 +191,7 @@ workouts:
       Warmup
       - Warm up 10m ramp 45%-65% 90rpm
 
-      - Endurance 30m 62% 85-95rpm
+      - Endurance 20m 60% 85-95rpm
 
       Cooldown
       - Cool down 5m ramp 60%-45% 85rpm

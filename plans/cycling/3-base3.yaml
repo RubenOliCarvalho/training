@@ -11,28 +11,28 @@ workouts:
       Warmup
       - Warm up 10m ramp 45%-65% 90rpm
 
-      Force 3x
-      - Climb 6m 88% 65rpm
-      - Easy 4m 55% 90rpm
+      - Endurance 8m 65% 85-95rpm
 
-      - Endurance 10m 65% 85-95rpm
+      Force 4x
+      - Climb 5m 80% 65rpm
+      - Easy 3m 55% 90rpm
 
       Cooldown
       - Cool down 5m ramp 60%-45% 85rpm
   - date: 2027-01-20
-    name: "Bike W9 Wed - Sweet spot"
+    name: "Bike W9 Wed - SteadyState"
     type: VirtualRide
     description: |
-      Sweet spot: hard but sustainable; this builds the power you can hold for long efforts.
+      SteadyState: hard but controlled, even power for the whole interval; this builds the power you can hold on long climbs.
 
       Warmup
       - Warm up 10m ramp 45%-65% 90rpm
 
-      Sweet spot 2x
-      - Sweet spot 12m 90% 85-95rpm
-      - Easy 5m 55% 90rpm
+      - Endurance 10m 65% 85-95rpm
 
-      - Endurance 11m 65% 85-95rpm
+      SteadyState 3x
+      - SteadyState 6m 88% 85-95rpm
+      - Easy 4m 55% 90rpm
 
       Cooldown
       - Cool down 5m ramp 60%-45% 85rpm
@@ -40,16 +40,16 @@ workouts:
     name: "Bike W9 Fri - Endurance + tempo finish"
     type: VirtualRide
     description: |
-      Aerobic endurance: conversational, steady. Spin-ups: smooth, quiet upper body, no bouncing.
+      Aerobic endurance (EnduranceMiles): conversational, steady; you could ride like this for hours. Ride to heart rate: if HR goes above 140, let the watts drop until it settles. FastPedal: high cadence, smooth and quiet upper body, no bouncing.
 
       Warmup
       - Warm up 10m ramp 45%-65% 90rpm
 
-      - Endurance 30m 68% 85-95rpm
+      - Endurance 30m 66% 85-95rpm
 
-      - Tempo finish 10m 80% 85-95rpm
+      - Tempo finish 10m 78% 85-95rpm
 
-      - Endurance 5m 65% 85-95rpm
+      - Endurance 3m 65% 85-95rpm
 
       Cooldown
       - Cool down 5m ramp 60%-45% 85rpm
@@ -62,28 +62,28 @@ workouts:
       Warmup
       - Warm up 10m ramp 45%-65% 90rpm
 
-      Force 4x
-      - Climb 6m 88% 65rpm
-      - Easy 4m 55% 90rpm
+      Force 5x
+      - Climb 5m 80% 65rpm
+      - Easy 3m 55% 90rpm
 
-      - Endurance 5m 65% 85-95rpm
+      - Endurance 3m 65% 85-95rpm
 
       Cooldown
       - Cool down 5m ramp 60%-45% 85rpm
   - date: 2027-01-27
-    name: "Bike W10 Wed - Sweet spot"
+    name: "Bike W10 Wed - SteadyState"
     type: VirtualRide
     description: |
-      Sweet spot: hard but sustainable; this builds the power you can hold for long efforts.
+      SteadyState: hard but controlled, even power for the whole interval; this builds the power you can hold on long climbs.
 
       Warmup
       - Warm up 10m ramp 45%-65% 90rpm
 
-      Sweet spot 2x
-      - Sweet spot 15m 90% 85-95rpm
-      - Easy 5m 55% 90rpm
+      - Endurance 8m 65% 85-95rpm
 
-      - Endurance 5m 65% 85-95rpm
+      SteadyState 3x
+      - SteadyState 8m 88% 85-95rpm
+      - Easy 4m 55% 90rpm
 
       Cooldown
       - Cool down 5m ramp 60%-45% 85rpm
@@ -91,16 +91,16 @@ workouts:
     name: "Bike W10 Fri - Endurance + tempo finish"
     type: VirtualRide
     description: |
-      Aerobic endurance: conversational, steady. Spin-ups: smooth, quiet upper body, no bouncing.
+      Aerobic endurance (EnduranceMiles): conversational, steady; you could ride like this for hours. Ride to heart rate: if HR goes above 140, let the watts drop until it settles. FastPedal: high cadence, smooth and quiet upper body, no bouncing.
 
       Warmup
       - Warm up 10m ramp 45%-65% 90rpm
 
-      - Endurance 25m 68% 85-95rpm
+      - Endurance 25m 66% 85-95rpm
 
-      - Tempo finish 15m 80% 85-95rpm
+      - Tempo finish 15m 78% 85-95rpm
 
-      - Endurance 5m 65% 85-95rpm
+      - Endurance 3m 65% 85-95rpm
 
       Cooldown
       - Cool down 5m ramp 60%-45% 85rpm
@@ -113,26 +113,28 @@ workouts:
       Warmup
       - Warm up 10m ramp 45%-65% 90rpm
 
-      Force 3x
-      - Climb 8m 88% 65rpm
-      - Easy 4m 55% 90rpm
+      - Endurance 8m 65% 85-95rpm
 
-      - Endurance 9m 65% 85-95rpm
+      Force 4x
+      - Climb 6m 82% 65rpm
+      - Easy 3m 55% 90rpm
 
       Cooldown
       - Cool down 5m ramp 60%-45% 85rpm
   - date: 2027-02-03
-    name: "Bike W11 Wed - Sweet spot"
+    name: "Bike W11 Wed - SteadyState"
     type: VirtualRide
     description: |
-      Sweet spot: hard but sustainable; this builds the power you can hold for long efforts.
+      SteadyState: hard but controlled, even power for the whole interval; this builds the power you can hold on long climbs.
 
       Warmup
       - Warm up 10m ramp 45%-65% 90rpm
 
-      Sweet spot 3x
-      - Sweet spot 11m 90% 85-95rpm
-      - Easy 4m 55% 90rpm
+      - Endurance 10m 65% 85-95rpm
+
+      SteadyState 2x
+      - SteadyState 12m 88% 85-95rpm
+      - Easy 5m 55% 90rpm
 
       Cooldown
       - Cool down 5m ramp 60%-45% 85rpm
@@ -140,16 +142,16 @@ workouts:
     name: "Bike W11 Fri - Endurance + tempo finish"
     type: VirtualRide
     description: |
-      Aerobic endurance: conversational, steady. Spin-ups: smooth, quiet upper body, no bouncing.
+      Aerobic endurance (EnduranceMiles): conversational, steady; you could ride like this for hours. Ride to heart rate: if HR goes above 140, let the watts drop until it settles. FastPedal: high cadence, smooth and quiet upper body, no bouncing.
 
       Warmup
       - Warm up 10m ramp 45%-65% 90rpm
 
-      - Endurance 20m 68% 85-95rpm
+      - Endurance 20m 66% 85-95rpm
 
-      - Tempo finish 20m 80% 85-95rpm
+      - Tempo finish 20m 78% 85-95rpm
 
-      - Endurance 5m 65% 85-95rpm
+      - Endurance 3m 65% 85-95rpm
 
       Cooldown
       - Cool down 5m ramp 60%-45% 85rpm
@@ -162,7 +164,7 @@ workouts:
       Warmup
       - Warm up 10m ramp 45%-65% 90rpm
 
-      - Endurance 25m 60% 85-95rpm
+      - Endurance 20m 58% 85-95rpm
 
       Cooldown
       - Cool down 5m ramp 60%-45% 85rpm
@@ -175,11 +177,11 @@ workouts:
       Warmup
       - Warm up 10m ramp 45%-65% 90rpm
 
-      - Endurance 20m 60% 85-95rpm
+      - Endurance 15m 58% 85-95rpm
 
-      Spin-ups 4x
-      - Spin 30s 60% 105-110rpm
-      - Easy 90s 55% 90rpm
+      FastPedal 3x
+      - FastPedal 1m 58% 100-110rpm
+      - Easy 2m 55% 85-90rpm
 
       Cooldown
       - Cool down 5m ramp 60%-45% 85rpm

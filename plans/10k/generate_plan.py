@@ -1,4 +1,13 @@
-"""Generate the 20-week 10K plan as one YAML file per block in plans/10k/."""
+"""Generate the 20-week trail 10K plan as one YAML file per block in plans/10k/.
+
+Goal: FINISH 10 km on trail (no race date, no time goal). Method: run/walk
+progression (Galloway-style walk breaks) inside Friel-style periodization
+(3 load weeks + 1 recovery week). No threshold/cruise intervals: the only
+intensity is short hill repeats and strides. Trail rules in every session:
+hike the climbs, walk technical descents, HR <= 140 on the flats.
+Week 20 is the 10K finish attempt; the date is flexible: if a long session
+felt hard, repeat that week before moving on.
+"""
 from datetime import date, timedelta
 from pathlib import Path
 
@@ -41,20 +50,22 @@ def continuous(note, minutes, strides=False, drills=False):
     return "\n".join(parts), minutes
 
 
-def intervals(note, reps, on_min, zone, off_min):
-    body = f"{note}\n\n{WU_JOG}\nMain set {reps}x\n- {'Steady' if zone == 'Z3' else 'Cruise'} {on_min}m {zone} HR\n- Easy jog/walk {off_min}m\n\n{CD_JOG}"
-    return body, 20 + reps * (on_min + off_min * 0.5)
+def hills(note, reps, up_s, strides=False):
+    parts = [note + "\n", WU_JOG, f"Hills {reps}x"+"\n"+f"- Uphill {d(up_s)} Z3 HR"+"\n"+"- Walk down 2m"+"\n"]
+    if strides:
+        parts.append(STRIDES)
+    parts.append(CD_JOG)
+    return "\n".join(parts), 20 + reps * up_s / 60
 
 
 def race(note):
-    body = (f"{note}\n\n{WU_JOG}\nStrides 3x\n- Relaxed pickup 15s\n- Walk 45s\n\n"
-            "Race\n- First 5k even 5km Z3 HR\n- Second 5k 5km Z3-Z4 HR\n\nCooldown\n- Easy walk 10m\n")
-    return body, 85
+    body = f"{note}\n\n{WU_WALK}\nTrail 10K\n- Easy 10km {EASY}\n\n{CD_WALK}"
+    return body, 100
 
 
-N_EASY = "Easy: stay conversational; if HR goes above 140, slow down or walk until it settles."
-N_LONG = "Long aerobic session: time on feet matters, not pace. Walk 1 min whenever HR goes above 140."
-N_RW = "Run/walk: walk breaks are part of the plan, not a failure. Short, light steps; soft surface if possible."
+N_EASY = "Easy: stay conversational; if HR goes above 140, slow down or walk until it settles. Hike any steep climb."
+N_LONG = "Long trail session: time on feet matters, not pace. Hike every climb, walk technical descents, walk 1 min whenever HR goes above 140."
+N_RW = "Run/walk: walk breaks are part of the plan, not a failure. Short, light steps; hike the climbs, walk technical descents."
 N_REC = "Recovery week: less volume so the last three weeks sink in."
 
 # (week, block, [(day_offset, name, (description, run_minutes)), ...])
@@ -78,26 +89,32 @@ wk(10, 3, runwalk(N_RW, 3, 480, 60, strides=True, drills=True), runwalk(N_RW, 3,
 wk(11, 3, runwalk(N_RW, 3, 600, 60, strides=True, drills=True), continuous(N_EASY, 20), runwalk(N_LONG, 4, 600, 60))
 wk(12, 3, continuous(N_REC, 20, strides=True), continuous(N_REC, 20),
    continuous("Benchmark: 30 min continuous at HR <= 140. Note the distance; we repeat this later to measure aerobic progress.", 30))
-# Block 4: Build 1 (continuous running, steady Z3 work = muscular endurance)
-wk(13, 4, intervals("Steady running: comfortably hard, you can speak in short sentences.", 3, 5, "Z3", 2), continuous(N_EASY, 25), continuous(N_LONG, 40))
-wk(14, 4, intervals("Steady running: comfortably hard, you can speak in short sentences.", 4, 5, "Z3", 2), continuous(N_EASY, 30, strides=True), continuous(N_LONG, 45))
-wk(15, 4, intervals("Steady running: comfortably hard, you can speak in short sentences.", 3, 8, "Z3", 2), continuous(N_EASY, 30), continuous(N_LONG, 50))
-wk(16, 4, intervals(N_REC, 2, 8, "Z3", 2), continuous(N_REC, 25), continuous(N_REC, 35))
-# Block 5: Build 2 + peak (threshold / cruise intervals, longest runs)
-wk(17, 5, intervals("Cruise intervals at threshold: hard but controlled, even effort on every rep.", 4, 6, "Z4", 2), continuous(N_EASY, 35, strides=True), continuous(N_LONG, 55))
-wk(18, 5, intervals("Cruise intervals at threshold: hard but controlled, even effort on every rep.", 3, 8, "Z4", 2), continuous(N_EASY, 40), continuous(N_LONG, 65))
-wk(19, 5, intervals("Taper starts: same intensity, less volume.", 4, 5, "Z4", 2), continuous(N_EASY, 30, strides=True), continuous("Benchmark repeat: 30 min continuous at HR <= 140; compare distance with week 12.", 30))
-# Block 6: race week
-wk(20, 6, intervals("Race week: short and sharp, finish fresh.", 3, 3, "Z4", 2), continuous("Shake-out: very easy, legs only.", 20, strides=True),
-   race("10K race / time trial. Start controlled (Z3), only push in the second half. Walk breaks are fine if HR runs away early."))
+N_HILL = ("Hills: run (or power-hike if it is steep) up a 4-8% slope, strong but controlled, "
+          "tall posture, short quick steps. Walk back down. HR can go into Z3 on the climbs.")
+N_10K = ("Trail 10K finish. Start slower than feels necessary, hike every climb, walk technical descents, "
+         "walk 1 min whenever HR goes above 140 on the flats. Finishing is the goal; pace doesn't matter.")
+# Block 4: Build 1 (continuous running, hill strength, long sessions on trail)
+wk(13, 4, hills(N_HILL, 6, 45), continuous(N_EASY, 25), continuous(N_LONG, 45))
+wk(14, 4, hills(N_HILL, 8, 45, strides=True), continuous(N_EASY, 30), continuous(N_LONG, 50))
+wk(15, 4, hills(N_HILL, 6, 60), continuous(N_EASY, 30, strides=True), continuous(N_LONG, 60))
+wk(16, 4, hills(N_REC, 4, 45), continuous(N_REC, 25), continuous(N_REC, 40))
+# Block 5: Build 2 (longest time on feet, longer hills, benchmark repeat)
+wk(17, 5, hills(N_HILL, 8, 60), continuous(N_EASY, 35, strides=True), continuous(N_LONG, 70))
+wk(18, 5, hills(N_HILL, 6, 90), continuous(N_EASY, 35), continuous(N_LONG, 80))
+wk(19, 5, hills("Taper starts: same hills, less volume.", 4, 60),
+   continuous("Benchmark repeat: 30 min continuous at HR <= 140 on the same route as week 12; compare distance.", 30),
+   continuous(N_LONG, 50))
+# Block 6: 10K week
+wk(20, 6, continuous("Easy run, legs fresh for Saturday.", 25, strides=True), continuous("Shake-out: very easy, legs only.", 20),
+   race(N_10K))
 
 BLOCKS = {
     1: ("base1", "Block 1 - Base 1 (wk 1-4): impact tolerance and habit; run/walk with HR cap."),
     2: ("base2", "Block 2 - Base 2 (wk 5-8): longer run segments, first strides."),
     3: ("base3", "Block 3 - Base 3 (wk 9-12): towards 30 min continuous; drills; benchmark in wk 12."),
-    4: ("build1", "Block 4 - Build 1 (wk 13-16): continuous running; steady Z3 intervals."),
-    5: ("build2-peak", "Block 5 - Build 2 + peak (wk 17-19): threshold cruise intervals; longest runs; benchmark repeat."),
-    6: ("race", "Block 6 - Race week (wk 20): taper and 10K on Sat 10 Apr 2027."),
+    4: ("build1", "Block 4 - Build 1 (wk 13-16): continuous running; hill repeats; long trail sessions to 60 min."),
+    5: ("build2-peak", "Block 5 - Build 2 (wk 17-19): longer hills; long trail sessions to 80 min; benchmark repeat."),
+    6: ("race", "Block 6 - 10K week (wk 20): trail 10K finish, nominally Sat 10 Apr 2027 (date flexible)."),
 }
 
 OUT.mkdir(parents=True, exist_ok=True)
@@ -122,8 +139,10 @@ for b, (slug, title) in BLOCKS.items():
                 continue
             run_min += rmin
             first = desc.split("\n")[0]
-            if first.startswith("10K race"):
-                kind = "10K race"
+            if first.startswith("Trail 10K"):
+                kind = "Trail 10K finish"
+            elif "\nHills " in desc:
+                kind = "Hill repeats"
             elif "Benchmark" in first:
                 kind = "Benchmark 30 min"
             elif "Cruise" in desc:

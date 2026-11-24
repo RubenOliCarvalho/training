@@ -1,25 +1,25 @@
-# 10K plan - Block 4 - Build 1 (wk 13-16): continuous running; steady Z3 intervals.
+# 10K plan - Block 4 - Build 1 (wk 13-16): continuous running; hill repeats; long trail sessions to 60 min.
 # Push: venv\Scripts\python.exe pipeline\push_workouts.py plans\10k\4-build1.yaml
 plan: 10k-build1
 workouts:
   - date: 2027-02-16
-    name: "10K W13 Tue - Steady intervals"
+    name: "10K W13 Tue - Hill repeats"
     description: |
-      Steady running: comfortably hard, you can speak in short sentences.
+      Hills: run (or power-hike if it is steep) up a 4-8% slope, strong but controlled, tall posture, short quick steps. Walk back down. HR can go into Z3 on the climbs.
 
       Warmup
       - Easy jog/walk 10m Z1-Z2 HR
 
-      Main set 3x
-      - Steady 5m Z3 HR
-      - Easy jog/walk 2m
+      Hills 6x
+      - Uphill 45s Z3 HR
+      - Walk down 2m
 
       Cooldown
       - Easy jog/walk 10m Z1-Z2 HR
   - date: 2027-02-18
     name: "10K W13 Thu - Easy run"
     description: |
-      Easy: stay conversational; if HR goes above 140, slow down or walk until it settles.
+      Easy: stay conversational; if HR goes above 140, slow down or walk until it settles. Hike any steep climb.
 
       Warmup
       - Brisk walk 5m
@@ -32,34 +32,78 @@ workouts:
   - date: 2027-02-20
     name: "10K W13 Sat - Long run"
     description: |
-      Long aerobic session: time on feet matters, not pace. Walk 1 min whenever HR goes above 140.
+      Long trail session: time on feet matters, not pace. Hike every climb, walk technical descents, walk 1 min whenever HR goes above 140.
 
       Warmup
       - Brisk walk 5m
 
       Main
-      - Run easy 40m Z1-Z2 HR
+      - Run easy 45m Z1-Z2 HR
 
       Cooldown
       - Easy walk 5m
   - date: 2027-02-23
-    name: "10K W14 Tue - Steady intervals"
+    name: "10K W14 Tue - Hill repeats + strides"
     description: |
-      Steady running: comfortably hard, you can speak in short sentences.
+      Hills: run (or power-hike if it is steep) up a 4-8% slope, strong but controlled, tall posture, short quick steps. Walk back down. HR can go into Z3 on the climbs.
 
       Warmup
       - Easy jog/walk 10m Z1-Z2 HR
 
-      Main set 4x
-      - Steady 5m Z3 HR
-      - Easy jog/walk 2m
+      Hills 8x
+      - Uphill 45s Z3 HR
+      - Walk down 2m
+
+      Strides 4x
+      - Relaxed pickup 15s
+      - Walk 45s
 
       Cooldown
       - Easy jog/walk 10m Z1-Z2 HR
   - date: 2027-02-25
-    name: "10K W14 Thu - Easy run + strides"
+    name: "10K W14 Thu - Easy run"
     description: |
-      Easy: stay conversational; if HR goes above 140, slow down or walk until it settles.
+      Easy: stay conversational; if HR goes above 140, slow down or walk until it settles. Hike any steep climb.
+
+      Warmup
+      - Brisk walk 5m
+
+      Main
+      - Run easy 30m Z1-Z2 HR
+
+      Cooldown
+      - Easy walk 5m
+  - date: 2027-02-27
+    name: "10K W14 Sat - Long run"
+    description: |
+      Long trail session: time on feet matters, not pace. Hike every climb, walk technical descents, walk 1 min whenever HR goes above 140.
+
+      Warmup
+      - Brisk walk 5m
+
+      Main
+      - Run easy 50m Z1-Z2 HR
+
+      Cooldown
+      - Easy walk 5m
+  - date: 2027-03-02
+    name: "10K W15 Tue - Hill repeats"
+    description: |
+      Hills: run (or power-hike if it is steep) up a 4-8% slope, strong but controlled, tall posture, short quick steps. Walk back down. HR can go into Z3 on the climbs.
+
+      Warmup
+      - Easy jog/walk 10m Z1-Z2 HR
+
+      Hills 6x
+      - Uphill 1m Z3 HR
+      - Walk down 2m
+
+      Cooldown
+      - Easy jog/walk 10m Z1-Z2 HR
+  - date: 2027-03-04
+    name: "10K W15 Thu - Easy run + strides"
+    description: |
+      Easy: stay conversational; if HR goes above 140, slow down or walk until it settles. Hike any steep climb.
 
       Warmup
       - Brisk walk 5m
@@ -73,70 +117,30 @@ workouts:
 
       Cooldown
       - Easy walk 5m
-  - date: 2027-02-27
-    name: "10K W14 Sat - Long run"
-    description: |
-      Long aerobic session: time on feet matters, not pace. Walk 1 min whenever HR goes above 140.
-
-      Warmup
-      - Brisk walk 5m
-
-      Main
-      - Run easy 45m Z1-Z2 HR
-
-      Cooldown
-      - Easy walk 5m
-  - date: 2027-03-02
-    name: "10K W15 Tue - Steady intervals"
-    description: |
-      Steady running: comfortably hard, you can speak in short sentences.
-
-      Warmup
-      - Easy jog/walk 10m Z1-Z2 HR
-
-      Main set 3x
-      - Steady 8m Z3 HR
-      - Easy jog/walk 2m
-
-      Cooldown
-      - Easy jog/walk 10m Z1-Z2 HR
-  - date: 2027-03-04
-    name: "10K W15 Thu - Easy run"
-    description: |
-      Easy: stay conversational; if HR goes above 140, slow down or walk until it settles.
-
-      Warmup
-      - Brisk walk 5m
-
-      Main
-      - Run easy 30m Z1-Z2 HR
-
-      Cooldown
-      - Easy walk 5m
   - date: 2027-03-06
     name: "10K W15 Sat - Long run"
     description: |
-      Long aerobic session: time on feet matters, not pace. Walk 1 min whenever HR goes above 140.
+      Long trail session: time on feet matters, not pace. Hike every climb, walk technical descents, walk 1 min whenever HR goes above 140.
 
       Warmup
       - Brisk walk 5m
 
       Main
-      - Run easy 50m Z1-Z2 HR
+      - Run easy 60m Z1-Z2 HR
 
       Cooldown
       - Easy walk 5m
   - date: 2027-03-09
-    name: "10K W16 Tue - Steady intervals (recovery wk)"
+    name: "10K W16 Tue - Hill repeats (recovery wk)"
     description: |
       Recovery week: less volume so the last three weeks sink in.
 
       Warmup
       - Easy jog/walk 10m Z1-Z2 HR
 
-      Main set 2x
-      - Steady 8m Z3 HR
-      - Easy jog/walk 2m
+      Hills 4x
+      - Uphill 45s Z3 HR
+      - Walk down 2m
 
       Cooldown
       - Easy jog/walk 10m Z1-Z2 HR
@@ -162,7 +166,7 @@ workouts:
       - Brisk walk 5m
 
       Main
-      - Run easy 35m Z1-Z2 HR
+      - Run easy 40m Z1-Z2 HR
 
       Cooldown
       - Easy walk 5m

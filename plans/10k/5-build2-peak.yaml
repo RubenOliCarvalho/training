@@ -1,25 +1,25 @@
-# 10K plan - Block 5 - Build 2 + peak (wk 17-19): threshold cruise intervals; longest runs; benchmark repeat.
+# 10K plan - Block 5 - Build 2 (wk 17-19): longer hills; long trail sessions to 80 min; benchmark repeat.
 # Push: venv\Scripts\python.exe pipeline\push_workouts.py plans\10k\5-build2-peak.yaml
 plan: 10k-build2-peak
 workouts:
   - date: 2027-03-16
-    name: "10K W17 Tue - Threshold intervals"
+    name: "10K W17 Tue - Hill repeats"
     description: |
-      Cruise intervals at threshold: hard but controlled, even effort on every rep.
+      Hills: run (or power-hike if it is steep) up a 4-8% slope, strong but controlled, tall posture, short quick steps. Walk back down. HR can go into Z3 on the climbs.
 
       Warmup
       - Easy jog/walk 10m Z1-Z2 HR
 
-      Main set 4x
-      - Cruise 6m Z4 HR
-      - Easy jog/walk 2m
+      Hills 8x
+      - Uphill 1m Z3 HR
+      - Walk down 2m
 
       Cooldown
       - Easy jog/walk 10m Z1-Z2 HR
   - date: 2027-03-18
     name: "10K W17 Thu - Easy run + strides"
     description: |
-      Easy: stay conversational; if HR goes above 140, slow down or walk until it settles.
+      Easy: stay conversational; if HR goes above 140, slow down or walk until it settles. Hike any steep climb.
 
       Warmup
       - Brisk walk 5m
@@ -36,97 +36,93 @@ workouts:
   - date: 2027-03-20
     name: "10K W17 Sat - Long run"
     description: |
-      Long aerobic session: time on feet matters, not pace. Walk 1 min whenever HR goes above 140.
+      Long trail session: time on feet matters, not pace. Hike every climb, walk technical descents, walk 1 min whenever HR goes above 140.
 
       Warmup
       - Brisk walk 5m
 
       Main
-      - Run easy 55m Z1-Z2 HR
+      - Run easy 70m Z1-Z2 HR
 
       Cooldown
       - Easy walk 5m
   - date: 2027-03-23
-    name: "10K W18 Tue - Threshold intervals"
+    name: "10K W18 Tue - Hill repeats"
     description: |
-      Cruise intervals at threshold: hard but controlled, even effort on every rep.
+      Hills: run (or power-hike if it is steep) up a 4-8% slope, strong but controlled, tall posture, short quick steps. Walk back down. HR can go into Z3 on the climbs.
 
       Warmup
       - Easy jog/walk 10m Z1-Z2 HR
 
-      Main set 3x
-      - Cruise 8m Z4 HR
-      - Easy jog/walk 2m
+      Hills 6x
+      - Uphill 90s Z3 HR
+      - Walk down 2m
 
       Cooldown
       - Easy jog/walk 10m Z1-Z2 HR
   - date: 2027-03-25
     name: "10K W18 Thu - Easy run"
     description: |
-      Easy: stay conversational; if HR goes above 140, slow down or walk until it settles.
+      Easy: stay conversational; if HR goes above 140, slow down or walk until it settles. Hike any steep climb.
 
       Warmup
       - Brisk walk 5m
 
       Main
-      - Run easy 40m Z1-Z2 HR
+      - Run easy 35m Z1-Z2 HR
 
       Cooldown
       - Easy walk 5m
   - date: 2027-03-27
     name: "10K W18 Sat - Long run"
     description: |
-      Long aerobic session: time on feet matters, not pace. Walk 1 min whenever HR goes above 140.
+      Long trail session: time on feet matters, not pace. Hike every climb, walk technical descents, walk 1 min whenever HR goes above 140.
 
       Warmup
       - Brisk walk 5m
 
       Main
-      - Run easy 65m Z1-Z2 HR
+      - Run easy 80m Z1-Z2 HR
 
       Cooldown
       - Easy walk 5m
   - date: 2027-03-30
-    name: "10K W19 Tue - Threshold intervals"
+    name: "10K W19 Tue - Hill repeats"
     description: |
-      Taper starts: same intensity, less volume.
+      Taper starts: same hills, less volume.
 
       Warmup
       - Easy jog/walk 10m Z1-Z2 HR
 
-      Main set 4x
-      - Cruise 5m Z4 HR
-      - Easy jog/walk 2m
+      Hills 4x
+      - Uphill 1m Z3 HR
+      - Walk down 2m
 
       Cooldown
       - Easy jog/walk 10m Z1-Z2 HR
   - date: 2027-04-01
-    name: "10K W19 Thu - Easy run + strides"
+    name: "10K W19 Thu - Benchmark 30 min"
     description: |
-      Easy: stay conversational; if HR goes above 140, slow down or walk until it settles.
+      Benchmark repeat: 30 min continuous at HR <= 140 on the same route as week 12; compare distance.
 
       Warmup
       - Brisk walk 5m
 
       Main
       - Run easy 30m Z1-Z2 HR
-
-      Strides 4x
-      - Relaxed pickup 15s
-      - Walk 45s
 
       Cooldown
       - Easy walk 5m
   - date: 2027-04-03
-    name: "10K W19 Sat - Benchmark 30 min"
+    name: "10K W19 Sat - Long run"
     description: |
-      Benchmark repeat: 30 min continuous at HR <= 140; compare distance with week 12.
+      Long trail session: time on feet matters, not pace. Hike every climb, walk technical descents, walk 1 min whenever HR goes above 140.
 
       Warmup
       - Brisk walk 5m
 
       Main
-      - Run easy 30m Z1-Z2 HR
+      - Run easy 50m Z1-Z2 HR
 
       Cooldown
       - Easy walk 5m

@@ -5,7 +5,7 @@ workouts:
   - date: 2026-12-22
     name: "10K W5 Tue - Run/walk + strides"
     description: |
-      Run/walk: walk breaks are part of the plan, not a failure. Short, light steps; soft surface if possible.
+      Run/walk: walk breaks are part of the plan, not a failure. Short, light steps; hike the climbs, walk technical descents.
 
       Warmup
       - Brisk walk 5m
@@ -23,7 +23,7 @@ workouts:
   - date: 2026-12-24
     name: "10K W5 Thu - Run/walk"
     description: |
-      Run/walk: walk breaks are part of the plan, not a failure. Short, light steps; soft surface if possible.
+      Run/walk: walk breaks are part of the plan, not a failure. Short, light steps; hike the climbs, walk technical descents.
 
       Warmup
       - Brisk walk 5m
@@ -37,7 +37,7 @@ workouts:
   - date: 2026-12-26
     name: "10K W5 Sat - Long run/walk"
     description: |
-      Long aerobic session: time on feet matters, not pace. Walk 1 min whenever HR goes above 140.
+      Long trail session: time on feet matters, not pace. Hike every climb, walk technical descents, walk 1 min whenever HR goes above 140.
 
       Warmup
       - Brisk walk 5m
@@ -51,7 +51,7 @@ workouts:
   - date: 2026-12-29
     name: "10K W6 Tue - Run/walk + strides"
     description: |
-      Run/walk: walk breaks are part of the plan, not a failure. Short, light steps; soft surface if possible.
+      Run/walk: walk breaks are part of the plan, not a failure. Short, light steps; hike the climbs, walk technical descents.
 
       Warmup
       - Brisk walk 5m
@@ -69,7 +69,7 @@ workouts:
   - date: 2026-12-31
     name: "10K W6 Thu - Run/walk"
     description: |
-      Run/walk: walk breaks are part of the plan, not a failure. Short, light steps; soft surface if possible.
+      Run/walk: walk breaks are part of the plan, not a failure. Short, light steps; hike the climbs, walk technical descents.
 
       Warmup
       - Brisk walk 5m
@@ -83,7 +83,7 @@ workouts:
   - date: 2027-01-02
     name: "10K W6 Sat - Long run/walk"
     description: |
-      Long aerobic session: time on feet matters, not pace. Walk 1 min whenever HR goes above 140.
+      Long trail session: time on feet matters, not pace. Hike every climb, walk technical descents, walk 1 min whenever HR goes above 140.
 
       Warmup
       - Brisk walk 5m
@@ -97,7 +97,7 @@ workouts:
   - date: 2027-01-05
     name: "10K W7 Tue - Run/walk + strides"
     description: |
-      Run/walk: walk breaks are part of the plan, not a failure. Short, light steps; soft surface if possible.
+      Run/walk: walk breaks are part of the plan, not a failure. Short, light steps; hike the climbs, walk technical descents.
 
       Warmup
       - Brisk walk 5m
@@ -115,7 +115,7 @@ workouts:
   - date: 2027-01-07
     name: "10K W7 Thu - Run/walk"
     description: |
-      Run/walk: walk breaks are part of the plan, not a failure. Short, light steps; soft surface if possible.
+      Run/walk: walk breaks are part of the plan, not a failure. Short, light steps; hike the climbs, walk technical descents.
 
       Warmup
       - Brisk walk 5m
@@ -129,7 +129,7 @@ workouts:
   - date: 2027-01-09
     name: "10K W7 Sat - Long run/walk"
     description: |
-      Long aerobic session: time on feet matters, not pace. Walk 1 min whenever HR goes above 140.
+      Long trail session: time on feet matters, not pace. Hike every climb, walk technical descents, walk 1 min whenever HR goes above 140.
 
       Warmup
       - Brisk walk 5m
