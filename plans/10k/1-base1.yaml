@@ -2,20 +2,6 @@
 # Push: venv\Scripts\python.exe pipeline\push_workouts.py plans\10k\1-base1.yaml
 plan: 10k-base1
 workouts:
-  - date: 2026-11-24
-    name: "10K W1 Tue - Run/walk"
-    description: |
-      Run/walk: walk breaks are part of the plan, not a failure. Short, light steps; soft surface if possible.
-
-      Warmup
-      - Brisk walk 5m
-
-      Run/walk 8x
-      - Run easy 1m Z1-Z2 HR
-      - Walk 2m
-
-      Cooldown
-      - Easy walk 5m
   - date: 2026-11-26
     name: "10K W1 Thu - Run/walk"
     description: |

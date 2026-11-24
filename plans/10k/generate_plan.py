@@ -101,6 +101,12 @@ BLOCKS = {
 }
 
 OUT.mkdir(parents=True, exist_ok=True)
+# Runs that were dropped or swapped for another session; they are left out of
+# the block files so re-pushing a block doesn't bring them back.
+SKIPPED = {
+    date(2026, 11, 24): "W1 Tue: couldn't run, replaced by an easy bike ride (plans/adhoc.yaml)",
+}
+
 totals = []
 for b, (slug, title) in BLOCKS.items():
     lines = [f"# 10K plan - {title}",
@@ -112,6 +118,8 @@ for b, (slug, title) in BLOCKS.items():
         monday = START_MONDAY + timedelta(weeks=n - 1)
         run_min = 0
         for offset, day, (desc, rmin) in sessions:
+            if monday + timedelta(days=offset) in SKIPPED:
+                continue
             run_min += rmin
             first = desc.split("\n")[0]
             if first.startswith("10K race"):

@@ -1,0 +1,17 @@
+# One-off sessions and swaps that aren't part of a generated plan.
+# Push: venv\Scripts\python.exe pipeline\push_workouts.py plans\adhoc.yaml
+plan: adhoc
+workouts:
+  - date: 2026-11-24
+    name: "Easy ride (replaces 10K W1 Tue run)"
+    type: VirtualRide
+    description: |
+      Replaces today's run/walk. Easy aerobic riding the day after the ramp test: conversational, steady. If HR settles above 140, lower the target a little.
+
+      Warmup
+      - Warm up 10m ramp 45%-62% 90rpm
+
+      - Endurance 25m 62% 85-95rpm
+
+      Cooldown
+      - Cool down 5m ramp 60%-45% 85rpm
