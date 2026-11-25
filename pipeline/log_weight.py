@@ -98,7 +98,11 @@ def main():
         upsert_weight(conn, log_date, weight_kg, body_fat_pct, muscle_mass_kg)
         extras = []
         if body_fat_pct is not None:
+            # Same formulas as stg_weight_log; the database derives them, this is just feedback.
+            fat_mass_kg = weight_kg * body_fat_pct / 100
             extras.append(f"body fat {body_fat_pct}%")
+            extras.append(f"fat mass {fat_mass_kg:.1f} kg")
+            extras.append(f"fat-free mass {weight_kg - fat_mass_kg:.1f} kg")
         if muscle_mass_kg is not None:
             extras.append(f"muscle mass {muscle_mass_kg} kg")
         print(f"Logged {weight_kg} kg{' · ' + ' · '.join(extras) if extras else ''} for {log_date.isoformat()}")

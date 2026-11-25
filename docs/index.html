@@ -156,7 +156,7 @@
   <section id="trends">
     <div class="chart-box"><canvas id="weight-chart"></canvas></div>
     <div class="chart-box"><canvas id="body-fat-chart"></canvas></div>
-    <div class="chart-box"><canvas id="muscle-mass-chart"></canvas></div>
+    <div class="chart-box"><canvas id="body-comp-chart"></canvas></div>
     <div class="chart-box"><canvas id="power-chart"></canvas></div>
     <div class="chart-box"><canvas id="pace-chart"></canvas></div>
   </section>
@@ -458,7 +458,8 @@ function dailySummaryCards(row, acts) {
     { label: "Avg pace", value: avgPace !== null ? formatPace(avgPace) : "—" },
     { label: "Weight", value: row.weight_kg ? `${fmt(row.weight_kg, 1)} kg` : "—" },
     { label: "Body fat", value: fmtPct(row.body_fat_pct) },
-    { label: "Muscle mass", value: fmtKg(row.muscle_mass_kg) },
+    { label: "Fat mass", value: fmtKg(row.fat_mass_kg) },
+    { label: "Fat-free mass", value: fmtKg(row.fat_free_mass_kg) },
     { label: "Fitness (CTL)", value: fmt(row.ctl, 1) },
     { label: "Fatigue (ATL)", value: fmt(row.atl, 1) },
     { label: "Form (TSB)", value: fmt(row.tsb, 1) },
@@ -482,7 +483,8 @@ function weeklySummaryCards(row, acts) {
     { label: "Avg pace", value: avgPace !== null ? formatPace(avgPace) : "—" },
     { label: "Avg weight", value: row.avg_weight_kg ? `${fmt(row.avg_weight_kg, 1)} kg` : "—" },
     { label: "Avg body fat", value: fmtPct(row.avg_body_fat_pct) },
-    { label: "Avg muscle mass", value: fmtKg(row.avg_muscle_mass_kg) },
+    { label: "Avg fat mass", value: fmtKg(row.avg_fat_mass_kg) },
+    { label: "Avg fat-free mass", value: fmtKg(row.avg_fat_free_mass_kg) },
     { label: "Fitness (CTL)", value: fmt(row.avg_ctl, 1) },
     { label: "Fatigue (ATL)", value: fmt(row.avg_atl, 1) },
     { label: "Form (TSB)", value: fmt(row.avg_tsb, 1) },
@@ -506,7 +508,8 @@ function monthlySummaryCards(row, acts) {
     { label: "Avg pace", value: avgPace !== null ? formatPace(avgPace) : "—" },
     { label: "Avg weight", value: row.avg_weight_kg ? `${fmt(row.avg_weight_kg, 1)} kg` : "—" },
     { label: "Avg body fat", value: fmtPct(row.avg_body_fat_pct) },
-    { label: "Avg muscle mass", value: fmtKg(row.avg_muscle_mass_kg) },
+    { label: "Avg fat mass", value: fmtKg(row.avg_fat_mass_kg) },
+    { label: "Avg fat-free mass", value: fmtKg(row.avg_fat_free_mass_kg) },
     { label: "Fitness (CTL)", value: fmt(row.avg_ctl, 1) },
     { label: "Fatigue (ATL)", value: fmt(row.avg_atl, 1) },
     { label: "Form (TSB)", value: fmt(row.avg_tsb, 1) },
@@ -525,8 +528,32 @@ function yearlySummaryCards(row) {
     { label: "Peak fitness (CTL)", value: fmt(row.peak_ctl, 1), sub: `avg ${fmt(row.avg_ctl, 1)}` },
     { label: "Weight", value: row.end_weight_kg ? `${fmt(row.end_weight_kg, 1)} kg` : "—", sub: changeText(row.start_weight_kg, row.end_weight_kg, " kg") },
     { label: "Body fat", value: fmtPct(row.end_body_fat_pct), sub: changeText(row.start_body_fat_pct, row.end_body_fat_pct, " pts") },
-    { label: "Muscle mass", value: fmtKg(row.end_muscle_mass_kg), sub: changeText(row.start_muscle_mass_kg, row.end_muscle_mass_kg, " kg") },
+    { label: "Fat mass", value: fmtKg(row.end_fat_mass_kg), sub: changeText(row.start_fat_mass_kg, row.end_fat_mass_kg, " kg") },
+    { label: "Fat-free mass", value: fmtKg(row.end_fat_free_mass_kg), sub: changeText(row.start_fat_free_mass_kg, row.end_fat_free_mass_kg, " kg") },
   ];
+}
+
+// Least-squares line through the weigh-ins of the last `windowDays` days.
+// Needs at least 3 readings spread over 14+ days, otherwise returns null.
+function weightTrendFit(dailyRows, windowDays = 42) {
+  const dayNum = s => Date.parse(s.slice(0, 10) + "T00:00:00Z") / 86400000;
+  const lastDay = dayNum(dailyRows[dailyRows.length - 1].calendar_date);
+  const pts = dailyRows
+    .filter(d => d.is_weigh_in_day && d.weight_kg != null && dayNum(d.calendar_date) > lastDay - windowDays)
+    .map(d => [dayNum(d.calendar_date), Number(d.weight_kg)]);
+  if (pts.length < 3 || pts[pts.length - 1][0] - pts[0][0] < 14) return null;
+  const n = pts.length;
+  const mx = pts.reduce((s, p) => s + p[0], 0) / n, my = pts.reduce((s, p) => s + p[1], 0) / n;
+  const slope = pts.reduce((s, p) => s + (p[0] - mx) * (p[1] - my), 0) / pts.reduce((s, p) => s + (p[0] - mx) ** 2, 0);
+  const perWeek = slope * 7;
+  const first = pts[0][0];
+  return {
+    windowDays,
+    perWeek,
+    short: `${perWeek > 0 ? "+" : ""}${perWeek.toFixed(2)} kg/week trend (${windowDays / 7} wk)`,
+    text: `${perWeek > 0 ? "+" : ""}${perWeek.toFixed(2)} kg/week (last ${windowDays} days, ${n} weigh-ins)`,
+    valueAt: dateStr => { const x = dayNum(dateStr); return x >= first && x <= lastDay ? my + slope * (x - mx) : null; },
+  };
 }
 
 function longestStreak(dailyRows) {
@@ -681,10 +708,12 @@ async function main() {
 
   const latest = daily[daily.length - 1];
   const latestWeek = weekly[weekly.length - 1];
+  const weightTrend = weightTrendFit(daily);
   const overviewCards = [
-    { label: "Weight", value: latest.weight_kg ? `${fmt(latest.weight_kg, 1)} kg` : "—", extra: "" },
+    { label: "Weight", value: latest.weight_kg ? `${fmt(latest.weight_kg, 1)} kg` : "—", sub: weightTrend ? weightTrend.short : "", extra: "" },
     { label: "Body fat", value: fmtPct(latest.body_fat_pct), extra: "" },
-    { label: "Muscle mass", value: fmtKg(latest.muscle_mass_kg), extra: "" },
+    { label: "Fat mass", value: fmtKg(latest.fat_mass_kg), extra: "" },
+    { label: "Fat-free mass", value: fmtKg(latest.fat_free_mass_kg), extra: "" },
     { label: "Fitness (CTL)", value: fmt(latest.ctl, 1), extra: "" },
     { label: "Fatigue (ATL)", value: fmt(latest.atl, 1), extra: "" },
     { label: "Form (TSB)", value: fmt(latest.tsb, 1), extra: "" },
@@ -732,7 +761,8 @@ async function main() {
     { key: "exercise_minutes_target_status", label: "Min. status", statusClass: "exercise_minutes_target_status", format: v => v?.replace("_", " ") },
     { key: "weight_kg", label: "Weight (kg)", format: v => v ? fmt(v, 1) : "—" },
     { key: "body_fat_pct", label: "Body fat", format: fmtPct },
-    { key: "muscle_mass_kg", label: "Muscle (kg)", format: v => v ? fmt(v, 1) : "—" },
+    { key: "fat_mass_kg", label: "Fat mass (kg)", format: v => v ? fmt(v, 1) : "—" },
+    { key: "fat_free_mass_kg", label: "Fat-free (kg)", format: v => v ? fmt(v, 1) : "—" },
   ]);
 
   targetBandChart("weekly-chart", weekly.map(w => w.week_start.slice(0, 10)),
@@ -751,7 +781,8 @@ async function main() {
     { key: "exercise_minutes_target_status", label: "Min. status", statusClass: "exercise_minutes_target_status", format: v => v?.replace("_", " ") },
     { key: "avg_weight_kg", label: "Avg weight (kg)", format: v => v ? fmt(v, 1) : "—" },
     { key: "avg_body_fat_pct", label: "Avg body fat", format: fmtPct },
-    { key: "avg_muscle_mass_kg", label: "Avg muscle (kg)", format: v => v ? fmt(v, 1) : "—" },
+    { key: "avg_fat_mass_kg", label: "Avg fat mass (kg)", format: v => v ? fmt(v, 1) : "—" },
+    { key: "avg_fat_free_mass_kg", label: "Avg fat-free (kg)", format: v => v ? fmt(v, 1) : "—" },
   ]);
 
   targetBandChart("monthly-chart", monthly.map(m => m.month.slice(0, 7)),
@@ -770,17 +801,29 @@ async function main() {
     { key: "exercise_minutes_target_status", label: "Min. status", statusClass: "exercise_minutes_target_status", format: v => v?.replace("_", " ") },
     { key: "avg_weight_kg", label: "Avg weight (kg)", format: v => v ? fmt(v, 1) : "—" },
     { key: "avg_body_fat_pct", label: "Avg body fat", format: fmtPct },
-    { key: "avg_muscle_mass_kg", label: "Avg muscle (kg)", format: v => v ? fmt(v, 1) : "—" },
+    { key: "avg_fat_mass_kg", label: "Avg fat mass (kg)", format: v => v ? fmt(v, 1) : "—" },
+    { key: "avg_fat_free_mass_kg", label: "Avg fat-free (kg)", format: v => v ? fmt(v, 1) : "—" },
   ]);
 
-  const weightData = daily.filter(d => d.weight_kg !== null && d.weight_kg !== undefined);
+  // Weigh-ins only (the mart forward-fills between readings), on a daily axis so
+  // gaps between readings keep their real length; dashed line = fitted trend.
+  const firstWeighIn = daily.findIndex(d => d.is_weigh_in_day);
+  const weightDays = firstWeighIn >= 0 ? daily.slice(firstWeighIn) : [];
+  const weightDatasets = [lineDataset("Weigh-ins (kg)",
+    weightDays.map(d => d.is_weigh_in_day ? d.weight_kg : null), "#3ecf8e", { showLine: true, pointRadius: 3, spanGaps: true })];
+  if (weightTrend) {
+    weightDatasets.push(lineDataset(`Trend, last ${weightTrend.windowDays} days`,
+      weightDays.map(d => weightTrend.valueAt(d.calendar_date)), "#9aa4b2",
+      { showLine: true, pointRadius: 0, borderDash: [6, 4], spanGaps: false }));
+  }
   new Chart(document.getElementById("weight-chart"), {
     type: "line",
-    data: {
-      labels: weightData.map(d => d.calendar_date.slice(0, 10)),
-      datasets: [lineDataset("Weight (kg)", weightData.map(d => d.weight_kg), "#3ecf8e", { showLine: true, pointRadius: 2 })],
+    data: { labels: weightDays.map(d => d.calendar_date.slice(0, 10)), datasets: weightDatasets },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      scales: { x: { ticks: { maxTicksLimit: 12 } } },
+      plugins: { title: { display: true, text: weightTrend ? `Weight trend: ${weightTrend.text}` : "Weight trend" } },
     },
-    options: { responsive: true, maintainAspectRatio: false, plugins: { title: { display: true, text: "Weight trend" } } },
   });
 
   // The mart forward-fills between readings, so plot only the days where the
@@ -800,7 +843,22 @@ async function main() {
     });
   }
   readingChart("body-fat-chart", "body_fat_pct", "Body fat (%)", "#f5a623", "Body fat trend");
-  readingChart("muscle-mass-chart", "muscle_mass_kg", "Muscle mass (kg)", "#4f8cff", "Muscle mass trend");
+
+  const compPoints = daily.filter(d => d.is_weigh_in_day && d.fat_mass_kg != null);
+  new Chart(document.getElementById("body-comp-chart"), {
+    type: "line",
+    data: {
+      labels: compPoints.map(d => d.calendar_date.slice(0, 10)),
+      datasets: [
+        lineDataset("Fat mass (kg)", compPoints.map(d => d.fat_mass_kg), "#ef5350", { showLine: true, pointRadius: 3 }),
+        lineDataset("Fat-free mass (kg)", compPoints.map(d => d.fat_free_mass_kg), "#4f8cff", { showLine: true, pointRadius: 3 }),
+      ],
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { title: { display: true, text: compPoints.length ? "Fat mass vs fat-free mass (weight x body fat %)" : "Fat mass vs fat-free mass (no body fat readings yet)" } },
+    },
+  });
 
   const cyclingActs = activities
     .filter(a => a.activity_type === "Ride" || a.activity_type === "VirtualRide")
