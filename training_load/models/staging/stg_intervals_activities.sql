@@ -35,6 +35,13 @@ select
     nullif(avg_speed_mps, 0) * 3.6 as avg_speed_kph,
     nullif(avg_cadence, 0) as avg_cadence,
     nullif(calories, 0) as calories,
+    -- Temperature from the recording device's own sensor (no location involved).
+    -- Edge 830 on the bike reads ambient/room air; the Forerunner on the wrist
+    -- reads high from body heat, so only compare watch values with each other.
+    round(avg_temp_c, 1) as device_avg_temp_c,
+    min_temp_c as device_min_temp_c,
+    max_temp_c as device_max_temp_c,
+    raw_json ->> 'device_name' as device_name,
     {{ sport_family('activity_type') }} as sport_family,
     -- Progress markers computed by intervals.icu (null where not applicable):
     -- power_hr_z2 = average watts per heartbeat while HR was in Z2 (rides);

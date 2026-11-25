@@ -7,6 +7,8 @@
 --     meaningful on steady rides (decoupling_valid: 30+ min, variability index
 --     <= 1.10); the ramp test and interval sessions are excluded that way.
 --   eftp_w: intervals.icu's rolling FTP estimate; ftp_w is the FTP set at the time.
+--   device_avg_temp_c: Edge 830 sensor (room air on indoor rides); heat raises HR
+--     at the same power, so it explains part of the drift and W/bpm scatter.
 
 select
     a.activity_id,
@@ -26,7 +28,9 @@ select
     a.ftp_at_activity as ftp_w,
     p.best_1m_w,
     p.best_5m_w,
-    p.best_20m_w
+    p.best_20m_w,
+    a.device_avg_temp_c,
+    a.trainer
 from {{ ref('stg_intervals_activities') }} a
 left join {{ ref('stg_activity_power_bests') }} p using (activity_id)
 where a.sport_family = 'Ride'

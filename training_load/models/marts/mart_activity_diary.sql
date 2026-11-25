@@ -25,6 +25,10 @@ select
     training_load,
     ctl_intervals,
     atl_intervals,
-    calories
+    calories,
+    device_avg_temp_c,
+    device_min_temp_c,
+    device_max_temp_c,
+    device_name
 from {{ ref('stg_intervals_activities') }}
 order by start_date_local desc

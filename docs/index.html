@@ -150,6 +150,7 @@
     <div class="cards" id="progress-cards"></div>
     <div class="chart-box"><canvas id="progress-pwhr-chart"></canvas></div>
     <div class="chart-box"><canvas id="progress-decoupling-chart"></canvas></div>
+    <div class="chart-box"><canvas id="progress-heat-chart"></canvas></div>
     <div class="chart-box"><canvas id="progress-run-chart"></canvas></div>
     <div class="chart-box"><canvas id="progress-power-chart"></canvas></div>
     <div class="chart-box"><canvas id="progress-ftp-chart"></canvas></div>
@@ -240,6 +241,7 @@
   </section>
 
   <section id="activities">
+    <p class="section-note" id="activities-note"></p>
     <div class="table-wrap"><table id="activities-table"></table></div>
   </section>
 </main>
@@ -481,6 +483,18 @@ function formatMonthLabel(dateStr) {
   });
 }
 
+function isWatch(a) { return /forerunner|fenix|venu|vivo|instinct|epix|watch/i.test(a.device_name || ""); }
+
+function workoutTempCard(acts) {
+  const withTemp = acts.filter(a => a.device_avg_temp_c != null);
+  if (!withTemp.length) return { label: "Workout temp", value: "—" };
+  const bike = withTemp.filter(a => !isWatch(a));
+  const use = bike.length ? bike : withTemp;
+  const mins = use.reduce((s, a) => s + (a.moving_time_min || 0), 0) || use.length;
+  const avg = use.reduce((s, a) => s + Number(a.device_avg_temp_c) * ((a.moving_time_min || 0) || 1), 0) / mins;
+  return { label: "Workout temp", value: `${fmt(avg)} °C`, sub: bike.length ? "bike computer" : "watch (reads high)" };
+}
+
 function dailySummaryCards(row, acts) {
   const { avgPower, avgPace } = computeActivityAverages(acts);
   return [
@@ -495,6 +509,7 @@ function dailySummaryCards(row, acts) {
     },
     { label: "Avg power", value: avgPower !== null ? `${fmt(avgPower)} W` : "—" },
     { label: "Avg pace", value: avgPace !== null ? formatPace(avgPace) : "—" },
+    workoutTempCard(acts),
     { label: "Weight", value: row.weight_kg ? `${fmt(row.weight_kg, 1)} kg` : "—" },
     { label: "Body fat", value: fmtPct(row.body_fat_pct) },
     { label: "Fat mass", value: fmtKg(row.fat_mass_kg) },
@@ -927,6 +942,32 @@ function renderProgress(rides, runs) {
     "Watts per heartbeat in HR Z2 (steady rides, 10+ min in Z2). Z2 was 127-140 bpm until 25 Nov 2026, 136-148 after: compare within each period", { unit: "W/bpm" });
   progressChart("progress-decoupling-chart", steady, "decoupling", "HR drift (%)", "#ef5350",
     "Heart-rate drift on steady rides (30+ min): lower = stronger aerobic base", { refLine: 5, refLabel: "5% target", unit: "%" });
+
+  // Heat vs HR drift on steady indoor rides (Edge 830 = room temperature).
+  const heatRides = steady.filter(r => r.trainer && r.device_avg_temp_c != null && r.decoupling != null);
+  const heatFit = linearFit(heatRides.map(r => Number(r.device_avg_temp_c)), heatRides.map(r => Number(r.decoupling)));
+  const temps = heatRides.map(r => Number(r.device_avg_temp_c));
+  const tMin = Math.min(...temps), tMax = Math.max(...temps);
+  new Chart(document.getElementById("progress-heat-chart"), {
+    type: "scatter",
+    data: {
+      datasets: [
+        { label: "Steady indoor ride", data: heatRides.map(r => ({ x: Number(r.device_avg_temp_c), y: Number(r.decoupling), name: r.activity_name, date: r.activity_date.slice(0, 10) })),
+          backgroundColor: "#ef5350", pointRadius: 5 },
+        ...(heatFit && heatRides.length >= 5 ? [{ type: "line", label: "Trend", data: [{ x: tMin, y: heatFit(tMin) }, { x: tMax, y: heatFit(tMax) }],
+          borderColor: "#9aa4b2", borderDash: [6, 4], pointRadius: 0 }] : []),
+        { type: "line", label: "5% target", data: [{ x: tMin, y: 5 }, { x: tMax, y: 5 }], borderColor: "#3ecf8e", borderDash: [2, 3], borderWidth: 1, pointRadius: 0 },
+      ],
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      scales: { x: { type: "linear", title: { display: true, text: "Room temperature (°C, Edge 830)" } }, y: { title: { display: true, text: "HR drift %" } } },
+      plugins: {
+        title: { display: true, text: heatRides.length ? "Room temperature vs heart-rate drift on steady indoor rides (one dot per ride)" : "Heat vs heart-rate drift (no steady indoor rides yet)" },
+        tooltip: { callbacks: { label: ctx => ctx.raw.name ? `${ctx.raw.date} · ${ctx.raw.name}: ${ctx.raw.x}°C, drift ${ctx.raw.y}%` : `${ctx.dataset.label}` } },
+      },
+    },
+  });
 
   // Runs: grade-adjusted pace (left, faster = up) and metres per heartbeat (right).
   new Chart(document.getElementById("progress-run-chart"), {
@@ -1442,7 +1483,10 @@ async function main() {
     { key: "avg_heartrate", label: "Avg HR", format: v => v ? fmt(v) : "—" },
     { key: "weighted_avg_watts", label: "NP (W)", format: v => v ? fmt(v) : "—" },
     { key: "calories", label: "Calories", format: v => v ? fmt(v) : "—" },
+    { key: "device_avg_temp_c", label: "Temp °C", format: (v, r) => v == null ? "—" : `${fmt(v)}${isWatch(r) ? "*" : ""}` },
   ]);
+  document.getElementById("activities-note").textContent =
+    "Temp = average from the device's own sensor. * = watch on the wrist: reads high from body heat, compare only with other watch values. Bike computer values are the air around you (room temperature indoors).";
 
   buildCalendarLookups(activities, daily);
   const latestDate = new Date(latest.calendar_date.slice(0, 10));
