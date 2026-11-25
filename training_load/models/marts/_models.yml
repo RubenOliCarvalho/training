@@ -13,6 +13,10 @@ models:
         description: weight_kg * body_fat_pct / 100 of the same reading. Forward-filled from the most recent reading with body fat.
       - name: fat_free_mass_kg
         description: weight_kg - fat_mass_kg of the same reading. Forward-filled like fat_mass_kg.
+      - name: sleep_hours
+        description: From intervals.icu wellness sleepSecs (Garmin), dated the morning of waking.
+      - name: resting_hr_7d_avg
+        description: Mean of the last 7 calendar days (incl. today); null if fewer than 4 readings. Same rule for hrv_7d_avg and sleep_hours_7d_avg.
       - name: is_weigh_in_day
         description: True on days with a weight log entry (the other body columns are forward-filled).
         tests: [not_null]

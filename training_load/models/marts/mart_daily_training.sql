@@ -98,6 +98,29 @@ weight_ffill as (
 
 ),
 
+-- 7-day moving averages over calendar days (the spine has one row per day);
+-- null unless at least 4 of the 7 days have a reading.
+recovery as (
+
+    select
+        t.calendar_date,
+        w.sleep_hours,
+        w.sleep_score,
+        w.resting_hr,
+        w.hrv,
+        case when count(w.resting_hr) over last7 >= 4
+            then round(avg(w.resting_hr) over last7, 1) end as resting_hr_7d_avg,
+        case when count(w.hrv) over last7 >= 4
+            then round(avg(w.hrv) over last7, 1) end as hrv_7d_avg,
+        case when count(w.sleep_hours) over last7 >= 4
+            then round(avg(w.sleep_hours) over last7, 2) end as sleep_hours_7d_avg
+    from training t
+    left join {{ ref('stg_intervals_wellness') }} w
+        on w.wellness_date = t.calendar_date
+    window last7 as (order by t.calendar_date rows between 6 preceding and current row)
+
+),
+
 exercise_minutes_target as (
 
     select target_min, target_max
@@ -143,6 +166,13 @@ select
     wf.fat_mass_kg,
     wf.fat_free_mass_kg,
     wf.is_weigh_in_day,
+    r.sleep_hours,
+    r.sleep_score,
+    r.resting_hr,
+    r.hrv,
+    r.resting_hr_7d_avg,
+    r.hrv_7d_avg,
+    r.sleep_hours_7d_avg,
     emt.target_min as exercise_minutes_target_min,
     emt.target_max as exercise_minutes_target_max,
     case
@@ -159,6 +189,8 @@ left join garmin_outdoor_temp g
     on g.activity_date = t.calendar_date
 left join weight_ffill wf
     on wf.calendar_date = t.calendar_date
+left join recovery r
+    on r.calendar_date = t.calendar_date
 cross join exercise_calorie_target ect
 cross join exercise_minutes_target emt
 order by t.calendar_date

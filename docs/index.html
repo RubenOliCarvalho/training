@@ -157,6 +157,9 @@
     <div class="chart-box"><canvas id="weight-chart"></canvas></div>
     <div class="chart-box"><canvas id="body-fat-chart"></canvas></div>
     <div class="chart-box"><canvas id="body-comp-chart"></canvas></div>
+    <div class="chart-box"><canvas id="sleep-chart"></canvas></div>
+    <div class="chart-box"><canvas id="rhr-chart"></canvas></div>
+    <div class="chart-box"><canvas id="hrv-chart"></canvas></div>
     <div class="chart-box"><canvas id="power-chart"></canvas></div>
     <div class="chart-box"><canvas id="pace-chart"></canvas></div>
   </section>
@@ -708,12 +711,24 @@ async function main() {
 
   const latest = daily[daily.length - 1];
   const latestWeek = weekly[weekly.length - 1];
+  // Wellness for today often arrives later than the activity data, so show the
+  // most recent day that has a reading and say which day it is.
+  function recoveryCard(label, key, avgKey, format) {
+    const row = [...daily].reverse().find(d => d[key] != null);
+    if (!row) return { label, value: "—", extra: "" };
+    const day = row.calendar_date.slice(0, 10) === latest.calendar_date.slice(0, 10) ? "today" : row.calendar_date.slice(5, 10);
+    const avg = row[avgKey] != null ? ` · 7-day avg ${format(row[avgKey])}` : "";
+    return { label, value: format(row[key]), sub: `${day}${avg}`, extra: "" };
+  }
   const weightTrend = weightTrendFit(daily);
   const overviewCards = [
     { label: "Weight", value: latest.weight_kg ? `${fmt(latest.weight_kg, 1)} kg` : "—", sub: weightTrend ? weightTrend.short : "", extra: "" },
     { label: "Body fat", value: fmtPct(latest.body_fat_pct), extra: "" },
     { label: "Fat mass", value: fmtKg(latest.fat_mass_kg), extra: "" },
     { label: "Fat-free mass", value: fmtKg(latest.fat_free_mass_kg), extra: "" },
+    recoveryCard("Sleep", "sleep_hours", "sleep_hours_7d_avg", v => `${fmt(v, 1)} h`),
+    recoveryCard("Resting HR", "resting_hr", "resting_hr_7d_avg", v => `${fmt(v)} bpm`),
+    recoveryCard("HRV", "hrv", "hrv_7d_avg", v => `${fmt(v)} ms`),
     { label: "Fitness (CTL)", value: fmt(latest.ctl, 1), extra: "" },
     { label: "Fatigue (ATL)", value: fmt(latest.atl, 1), extra: "" },
     { label: "Form (TSB)", value: fmt(latest.tsb, 1), extra: "" },
@@ -859,6 +874,48 @@ async function main() {
       plugins: { title: { display: true, text: compPoints.length ? "Fat mass vs fat-free mass (weight x body fat %)" : "Fat mass vs fat-free mass (no body fat readings yet)" } },
     },
   });
+
+  // Recovery (intervals.icu wellness, from Garmin): last 90 days.
+  const rec = daily.slice(-90);
+  const recLabels = rec.map(d => d.calendar_date.slice(0, 10));
+  new Chart(document.getElementById("sleep-chart"), {
+    data: {
+      labels: recLabels,
+      datasets: [
+        { type: "bar", label: "Sleep (h)", data: rec.map(d => d.sleep_hours), backgroundColor: "#4f8cff99", yAxisID: "y", order: 2 },
+        { type: "line", label: "Sleep score", data: rec.map(d => d.sleep_score), borderColor: "#f5a623", backgroundColor: "#f5a623",
+          pointRadius: 2, tension: 0.2, spanGaps: true, yAxisID: "y1", order: 1 },
+      ],
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      scales: {
+        x: { ticks: { maxTicksLimit: 12 } },
+        y: { position: "left", min: 0, suggestedMax: 10, title: { display: true, text: "Hours" } },
+        y1: { position: "right", min: 0, max: 100, grid: { drawOnChartArea: false }, title: { display: true, text: "Score" } },
+      },
+      plugins: { title: { display: true, text: "Sleep time and sleep score (last 90 days)" } },
+    },
+  });
+  function recoveryChart(canvasId, key, avgKey, label, unit, color) {
+    new Chart(document.getElementById(canvasId), {
+      type: "line",
+      data: {
+        labels: recLabels,
+        datasets: [
+          lineDataset(label, rec.map(d => d[key]), color + "88", { showLine: true, pointRadius: 2, borderWidth: 1, spanGaps: true }),
+          lineDataset("7-day average", rec.map(d => d[avgKey]), color, { borderWidth: 3, spanGaps: true }),
+        ],
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        scales: { x: { ticks: { maxTicksLimit: 12 } }, y: { title: { display: true, text: unit } } },
+        plugins: { title: { display: true, text: `${label} (last 90 days)` } },
+      },
+    });
+  }
+  recoveryChart("rhr-chart", "resting_hr", "resting_hr_7d_avg", "Resting HR", "bpm", "#ef5350");
+  recoveryChart("hrv-chart", "hrv", "hrv_7d_avg", "HRV", "ms", "#3ecf8e");
 
   const cyclingActs = activities
     .filter(a => a.activity_type === "Ride" || a.activity_type === "VirtualRide")
