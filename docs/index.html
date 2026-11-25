@@ -67,6 +67,16 @@
   .zone-row .zone-time { font-weight: 600; text-align: right; font-variant-numeric: tabular-nums; }
   .zone-row .zone-pct { color: var(--muted); text-align: right; font-variant-numeric: tabular-nums; }
   .zone-empty { color: var(--muted); font-size: 13px; text-align: center; padding: 12px 0; }
+  .status-bad { color: var(--bad); }
+  .plan-week { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 4px 16px; margin-bottom: 20px; }
+  .plan-row { display: grid; grid-template-columns: 28px 70px 1fr auto; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 14px; }
+  .plan-row:last-child { border-bottom: none; }
+  .plan-icon { font-size: 18px; text-align: center; }
+  .plan-day { color: var(--muted); }
+  .plan-name { min-width: 0; }
+  .plan-detail { display: block; color: var(--muted); font-size: 12px; margin-top: 2px; }
+  .plan-status { font-size: 12px; }
+  @media (max-width: 640px) { .plan-row { grid-template-columns: 24px 56px 1fr; } .plan-status { display: none; } }
 </style>
 </head>
 <body>
@@ -78,6 +88,8 @@
 
 <nav>
   <button data-section="overview" class="active">Overview</button>
+  <button data-section="plan">Plan</button>
+  <button data-section="progress">Progress</button>
   <button data-section="daily">Daily</button>
   <button data-section="weekly">Weekly</button>
   <button data-section="monthly">Monthly</button>
@@ -91,6 +103,27 @@
   <section id="overview" class="active">
     <div class="cards" id="overview-cards"></div>
     <div class="chart-box"><canvas id="overview-chart"></canvas></div>
+  </section>
+
+  <section id="plan">
+    <div class="cards" id="plan-cards"></div>
+    <h3 class="section-title">This week</h3>
+    <div class="plan-week" id="plan-week"></div>
+    <div class="chart-box"><canvas id="plan-weekly-chart"></canvas></div>
+    <h3 class="section-title">Week by week</h3>
+    <div class="table-wrap" style="margin-bottom:20px"><table id="plan-weekly-table"></table></div>
+    <h3 class="section-title">Planned vs done (up to a week ahead)</h3>
+    <div class="table-wrap"><table id="plan-table"></table></div>
+  </section>
+
+  <section id="progress">
+    <p class="section-note">Fitness markers, not volume: they should improve as your aerobic base grows. Each chart only uses sessions where the marker is meaningful.</p>
+    <div class="cards" id="progress-cards"></div>
+    <div class="chart-box"><canvas id="progress-pwhr-chart"></canvas></div>
+    <div class="chart-box"><canvas id="progress-decoupling-chart"></canvas></div>
+    <div class="chart-box"><canvas id="progress-run-chart"></canvas></div>
+    <div class="chart-box"><canvas id="progress-power-chart"></canvas></div>
+    <div class="chart-box"><canvas id="progress-ftp-chart"></canvas></div>
   </section>
 
   <section id="daily">
@@ -700,11 +733,277 @@ function buildPeriodSummary({ rows, activities, dateFilter, formatLabel, buildCa
   render();
 }
 
+// ---------- Plan & Progress (mart_planned_sessions, mart_weekly_plan,
+// ---------- mart_ride_progress, mart_run_progress) ----------
+
+function escapeHTML(s) {
+  return String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+}
+
+const PLAN_STATUS = {
+  done: { icon: "✅", label: "Done", cls: "status-within" },
+  missed: { icon: "❌", label: "Missed", cls: "status-bad" },
+  today: { icon: "⏳", label: "Today", cls: "status-above" },
+  upcoming: { icon: "○", label: "Upcoming", cls: "" },
+};
+
+// Weeks in a row, ending with the current week, with planned sessions and none
+// missed. The current week counts as long as nothing has been missed yet.
+function planStreak(weeklyPlan) {
+  let streak = 0;
+  for (let i = weeklyPlan.length - 1; i >= 0; i--) {
+    const w = weeklyPlan[i];
+    if (w.planned_sessions === 0) { if (w.is_current_week) continue; break; }
+    if (w.missed_sessions > 0) break;
+    streak += 1;
+  }
+  return streak;
+}
+
+function planWeekCard(weeklyPlan) {
+  const w = weeklyPlan.find(x => x.is_current_week);
+  if (!w || !w.planned_sessions) return { label: "This week's plan", value: "—", sub: "no sessions planned", extra: "" };
+  const streak = planStreak(weeklyPlan);
+  const bits = [];
+  if (w.missed_sessions) bits.push(`${w.missed_sessions} missed`);
+  if (w.remaining_sessions) bits.push(`${w.remaining_sessions} to go`);
+  bits.push(`streak ${streak} wk${streak === 1 ? "" : "s"}`);
+  return {
+    label: "This week's plan",
+    value: `${w.done_sessions} / ${w.planned_sessions} done`,
+    sub: bits.join(" · "),
+    extra: progressBarHTML(w.done_sessions, w.planned_sessions, w.planned_sessions),
+  };
+}
+
+function capText(s) {
+  if (s.status !== "done" || !s.hr_cap_applies || s.mins_over_hr_cap == null) return "—";
+  const m = Math.round(s.mins_over_hr_cap);
+  return m === 0 ? `<span class="status-within">0 min</span>` : `<span class="${m > 10 ? "status-bad" : "status-below"}">${m} min</span>`;
+}
+
+function renderPlan(planned, weeklyPlan) {
+  const current = weeklyPlan.find(w => w.is_current_week);
+  const streak = planStreak(weeklyPlan);
+  const due = weeklyPlan.reduce((n, w) => n + w.done_sessions + w.missed_sessions, 0);
+  const done = weeklyPlan.reduce((n, w) => n + w.done_sessions, 0);
+  document.getElementById("plan-cards").innerHTML = cardsHTML([
+    planWeekCard(weeklyPlan),
+    { label: "Rides this week", value: current ? `${current.done_rides} / ${current.planned_rides}` : "—" },
+    { label: "Runs this week", value: current ? `${current.done_runs} / ${current.planned_runs}` : "—" },
+    { label: "Completed weeks in a row", value: `${streak}`, sub: "weeks with nothing missed" },
+    { label: "All planned sessions", value: due ? `${Math.round(100 * done / due)}%` : "—", sub: `${done} of ${due} due sessions done` },
+    { label: "Tennis this week", value: current ? `${current.tennis_sessions}` : "—", sub: "agreed limit: 2" },
+  ]);
+
+  // This week's sessions, Monday to Sunday.
+  const weekStart = current ? current.week_start.slice(0, 10) : null;
+  const thisWeek = planned.filter(s => s.week_start.slice(0, 10) === weekStart);
+  document.getElementById("plan-week").innerHTML = thisWeek.length ? thisWeek.map(s => {
+    const st = PLAN_STATUS[s.status] || PLAN_STATUS.upcoming;
+    const day = new Date(s.event_date.slice(0, 10) + "T00:00:00Z").toLocaleDateString("default", { weekday: "short", day: "numeric", timeZone: "UTC" });
+    const capBit = s.hr_cap_applies && s.mins_over_hr_cap != null ? ` · ${fmt(s.mins_over_hr_cap)} min over 140` : "";
+    const detail = s.status === "done"
+      ? `${fmt(s.actual_min)} of ${fmt(s.planned_min)} min${s.avg_heartrate ? ` · avg HR ${fmt(s.avg_heartrate)}` : ""}${capBit}`
+      : `${fmt(s.planned_min)} min planned`;
+    return `<div class="plan-row"><span class="plan-icon">${st.icon}</span><span class="plan-day">${escapeHTML(day)}</span>` +
+      `<span class="plan-name">${escapeHTML(s.event_name)}<span class="plan-detail">${detail}</span></span>` +
+      `<span class="plan-status ${st.cls}">${st.label}</span></div>`;
+  }).join("") : `<div class="zone-empty">No sessions planned this week.</div>`;
+
+  const weeks = weeklyPlan.filter(w => w.planned_sessions > 0 || w.is_current_week);
+  new Chart(document.getElementById("plan-weekly-chart"), {
+    type: "bar",
+    data: {
+      labels: weeks.map(w => w.week_start.slice(0, 10)),
+      datasets: [
+        { label: "Done", data: weeks.map(w => w.done_sessions), backgroundColor: "#3ecf8e", stack: "plan" },
+        { label: "Missed", data: weeks.map(w => w.missed_sessions), backgroundColor: "#ef5350", stack: "plan" },
+        { label: "Still to do", data: weeks.map(w => w.remaining_sessions), backgroundColor: "#3a3f4b", stack: "plan" },
+        { label: "Tennis (unplanned)", data: weeks.map(w => w.tennis_sessions), backgroundColor: "#f5a623", stack: "extra" },
+        { label: "Strength (unplanned)", data: weeks.map(w => w.strength_sessions), backgroundColor: "#9aa1ab", stack: "extra" },
+      ],
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      scales: { x: { stacked: true }, y: { stacked: true, beginAtZero: true, ticks: { precision: 0 }, title: { display: true, text: "Sessions" } } },
+      plugins: { title: { display: true, text: "Planned sessions per week (week starting)" } },
+    },
+  });
+
+  buildTable(document.getElementById("plan-weekly-table"), [...weeks].reverse(), [
+    { key: "week_start", label: "Week of", format: v => v.slice(0, 10) },
+    { key: "done_sessions", label: "Done", format: (v, r) => `${v} / ${r.planned_sessions}` },
+    { key: "completion_pct", label: "Completed", format: v => v == null ? "—" : `${fmt(v)}%` },
+    { key: "done_rides", label: "Rides", format: (v, r) => `${v} / ${r.planned_rides}` },
+    { key: "done_runs", label: "Runs", format: (v, r) => `${v} / ${r.planned_runs}` },
+    { key: "done_minutes", label: "Minutes done / planned (due)", format: (v, r) => `${fmt(v)} / ${fmt(r.planned_due_minutes)}` },
+    { key: "mins_over_hr_cap", label: "Min over 140 (easy)", format: v => v == null ? "—" : fmt(v) },
+    { key: "tennis_sessions", label: "Tennis" },
+    { key: "strength_sessions", label: "Strength" },
+  ]);
+
+  const today = new Date().toISOString().slice(0, 10);
+  const horizon = addDaysISO(today, 7);
+  const rows = planned.filter(s => s.event_date.slice(0, 10) <= horizon).reverse();
+  buildTable(document.getElementById("plan-table"), rows, [
+    { key: "event_date", label: "Date", format: v => v.slice(0, 10) },
+    { key: "event_name", label: "Planned session", format: v => escapeHTML(v) },
+    { key: "status", label: "Status", format: v => { const st = PLAN_STATUS[v] || PLAN_STATUS.upcoming; return `<span class="${st.cls}">${st.icon} ${st.label}</span>`; } },
+    { key: "planned_min", label: "Planned min", format: v => fmt(v) },
+    { key: "actual_min", label: "Actual min", format: v => fmt(v) },
+    { key: "duration_pct", label: "% of plan", format: v => v == null ? "—" : `${fmt(v)}%` },
+    { key: "avg_heartrate", label: "Avg HR", format: v => fmt(v) },
+    { key: "mins_over_hr_cap", label: "Min over 140", format: (v, r) => capText(r) },
+  ]);
+}
+
+// Least-squares line through (x, y) points, returned as a function of x.
+function linearFit(xs, ys) {
+  const n = xs.length;
+  if (n < 3) return null;
+  const mx = xs.reduce((a, b) => a + b, 0) / n, my = ys.reduce((a, b) => a + b, 0) / n;
+  const den = xs.reduce((s, x) => s + (x - mx) ** 2, 0);
+  if (!den) return null;
+  const slope = xs.reduce((s, x, i) => s + (x - mx) * (ys[i] - my), 0) / den;
+  return x => my + slope * (x - mx);
+}
+
+const dayNumber = s => Date.parse(s.slice(0, 10) + "T00:00:00Z") / 86400000;
+
+function progressChart(canvasId, rows, key, label, color, title, { refLine, refLabel, unit = "" } = {}) {
+  const labels = rows.map(r => r.activity_date.slice(0, 10));
+  const values = rows.map(r => Number(r[key]));
+  const datasets = [lineDataset(label, values, color, { showLine: true, pointRadius: 4, tension: 0 })];
+  const fit = linearFit(rows.map(r => dayNumber(r.activity_date)), values);
+  if (fit) datasets.push(lineDataset("Trend", rows.map(r => fit(dayNumber(r.activity_date))), "#9aa4b2", { borderDash: [6, 4], borderWidth: 2 }));
+  if (refLine != null) datasets.push(lineDataset(refLabel, rows.map(() => refLine), "#3ecf8e", { borderDash: [2, 3], borderWidth: 1 }));
+  new Chart(document.getElementById(canvasId), {
+    type: "line",
+    data: { labels, datasets },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      scales: { y: { title: { display: !!unit, text: unit } } },
+      plugins: {
+        title: { display: true, text: rows.length ? title : `${title} (no qualifying sessions yet)` },
+        tooltip: { callbacks: { afterLabel: ctx => ctx.datasetIndex === 0 ? rows[ctx.dataIndex].activity_name : "" } },
+      },
+    },
+  });
+}
+
+function renderProgress(rides, runs) {
+  const z2 = rides.filter(r => r.z2_marker_valid);
+  const steady = rides.filter(r => r.decoupling_valid);
+  const powered = rides.filter(r => r.best_20m_w || r.best_5m_w || r.best_1m_w);
+  const best20 = maxBy(powered.filter(r => r.best_20m_w), "best_20m_w");
+  const lastZ2 = z2[z2.length - 1], firstZ2 = z2[0];
+  const lastSteady = steady[steady.length - 1];
+  const lastRide = rides[rides.length - 1];
+  const gapRuns = runs.filter(r => r.gap_pace_min_per_km);
+  const lastRun = gapRuns[gapRuns.length - 1];
+
+  // Compare 5-ride averages rather than single rides: one odd session (e.g. a
+  // short or hot ride) would otherwise dominate the change.
+  const avgOf = rs => rs.reduce((s, r) => s + Number(r.power_hr_z2), 0) / rs.length;
+  const z2Change = z2.length >= 10 ? (avgOf(z2.slice(-5)) / avgOf(z2.slice(0, 5)) - 1) * 100 : null;
+  document.getElementById("progress-cards").innerHTML = cardsHTML([
+    {
+      label: "Watts per heartbeat (HR Z2)", value: lastZ2 ? fmt(lastZ2.power_hr_z2, 2) : "—",
+      sub: z2Change !== null
+        ? `last 5 rides ${z2Change >= 0 ? "+" : ""}${z2Change.toFixed(0)}% vs first 5 (since ${firstZ2.activity_date.slice(0, 10)}) · higher = fitter`
+        : "higher = fitter",
+    },
+    { label: "HR drift, last steady ride", value: lastSteady ? `${fmt(lastSteady.decoupling, 1)}%` : "—", sub: "target: under 5%" },
+    { label: "Best 20-min power", value: best20 ? `${fmt(best20.best_20m_w)} W` : "—", sub: best20 ? best20.activity_date.slice(0, 10) : "" },
+    { label: "Estimated FTP (eFTP)", value: lastRide && lastRide.eftp_w ? `${fmt(lastRide.eftp_w)} W` : "—", sub: lastRide && lastRide.ftp_w ? `set FTP ${fmt(lastRide.ftp_w)} W` : "" },
+    { label: "Last run, grade-adjusted pace", value: lastRun ? formatPace(lastRun.gap_pace_min_per_km) : "—", sub: lastRun ? `avg HR ${fmt(lastRun.avg_heartrate)} · ${lastRun.activity_date.slice(0, 10)}` : "" },
+  ]);
+
+  progressChart("progress-pwhr-chart", z2, "power_hr_z2", "Watts per heartbeat in HR Z2", "#4f8cff",
+    "Aerobic efficiency on the bike: watts per heartbeat while HR is in Z2 (steady rides, 10+ min in Z2)", { unit: "W/bpm" });
+  progressChart("progress-decoupling-chart", steady, "decoupling", "HR drift (%)", "#ef5350",
+    "Heart-rate drift on steady rides (30+ min): lower = stronger aerobic base", { refLine: 5, refLabel: "5% target", unit: "%" });
+
+  // Runs: grade-adjusted pace (left, faster = up) and metres per heartbeat (right).
+  new Chart(document.getElementById("progress-run-chart"), {
+    type: "line",
+    data: {
+      labels: gapRuns.map(r => r.activity_date.slice(0, 10)),
+      datasets: [
+        lineDataset("Grade-adjusted pace", gapRuns.map(r => Number(r.gap_pace_min_per_km)), "#3ecf8e",
+          { showLine: true, pointRadius: gapRuns.map(r => r.is_benchmark ? 7 : 4), pointStyle: gapRuns.map(r => r.is_benchmark ? "star" : "circle"), tension: 0, yAxisID: "y" }),
+        lineDataset("Metres per heartbeat", gapRuns.map(r => Number(r.meters_per_beat)), "#f5a623",
+          { showLine: true, pointRadius: 3, tension: 0, yAxisID: "y1" }),
+      ],
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      scales: {
+        y: { reverse: true, title: { display: true, text: "min/km" }, ticks: { callback: v => formatPace(v).replace(" /km", "") } },
+        y1: { position: "right", grid: { drawOnChartArea: false }, title: { display: true, text: "m per beat" } },
+      },
+      plugins: {
+        title: { display: true, text: "Running: grade-adjusted pace and metres per heartbeat (stars = benchmark runs; run/walk includes walking)" },
+        tooltip: { callbacks: {
+          label: ctx => ctx.datasetIndex === 0 ? `Pace ${formatPace(ctx.parsed.y)}` : `${ctx.parsed.y.toFixed(2)} m/beat`,
+          afterLabel: ctx => `${gapRuns[ctx.dataIndex].activity_name} · avg HR ${fmt(gapRuns[ctx.dataIndex].avg_heartrate)}`,
+        } },
+      },
+    },
+  });
+
+  // Best power per month (max over that month's rides).
+  const months = {};
+  powered.forEach(r => {
+    const m = r.activity_date.slice(0, 7);
+    const cur = months[m] || (months[m] = { best_1m_w: null, best_5m_w: null, best_20m_w: null });
+    ["best_1m_w", "best_5m_w", "best_20m_w"].forEach(k => { if (r[k] != null && (cur[k] == null || r[k] > cur[k])) cur[k] = r[k]; });
+  });
+  const monthKeys = Object.keys(months).sort();
+  new Chart(document.getElementById("progress-power-chart"), {
+    type: "bar",
+    data: {
+      labels: monthKeys,
+      datasets: [
+        { label: "Best 1 min", data: monthKeys.map(m => months[m].best_1m_w), backgroundColor: "#ef5350" },
+        { label: "Best 5 min", data: monthKeys.map(m => months[m].best_5m_w), backgroundColor: "#f5a623" },
+        { label: "Best 20 min", data: monthKeys.map(m => months[m].best_20m_w), backgroundColor: "#4f8cff" },
+      ],
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      scales: { y: { beginAtZero: true, title: { display: true, text: "W" } } },
+      plugins: { title: { display: true, text: monthKeys.length ? "Best power by month" : "Best power by month (no data yet)" } },
+    },
+  });
+
+  const ftpRides = rides.filter(r => r.eftp_w || r.ftp_w);
+  new Chart(document.getElementById("progress-ftp-chart"), {
+    type: "line",
+    data: {
+      labels: ftpRides.map(r => r.activity_date.slice(0, 10)),
+      datasets: [
+        lineDataset("FTP set in intervals.icu", ftpRides.map(r => r.ftp_w), "#9aa1ab", { stepped: true, borderWidth: 2 }),
+        lineDataset("Estimated FTP (eFTP)", ftpRides.map(r => r.eftp_w), "#4f8cff", { showLine: true, pointRadius: 3, tension: 0 }),
+      ],
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      scales: { y: { title: { display: true, text: "W" } } },
+      plugins: { title: { display: true, text: "FTP: set value vs intervals.icu estimate" } },
+    },
+  });
+}
+
 async function main() {
   const [daily, weekly, monthly, yearly, activities, zonesMonthly, zonesYearly] = await Promise.all([
     loadJSON("daily"), loadJSON("weekly"), loadJSON("monthly"), loadJSON("yearly"), loadJSON("activities"),
     loadJSON("zones_monthly"), loadJSON("zones_yearly"),
   ]);
+  // Plan/Progress data; empty if the export predates these marts.
+  const [planned, weeklyPlan, rideProgress, runProgress] = await Promise.all(
+    ["planned", "weekly_plan", "ride_progress", "run_progress"].map(n => loadJSON(n).catch(() => [])));
 
   document.getElementById("subtitle").textContent =
     `${daily.length} days tracked · ${activities.length} activities · updated ${daily[daily.length - 1].calendar_date.slice(0,10)}`;
@@ -722,6 +1021,7 @@ async function main() {
   }
   const weightTrend = weightTrendFit(daily);
   const overviewCards = [
+    planWeekCard(weeklyPlan),
     { label: "Weight", value: latest.weight_kg ? `${fmt(latest.weight_kg, 1)} kg` : "—", sub: weightTrend ? weightTrend.short : "", extra: "" },
     { label: "Body fat", value: fmtPct(latest.body_fat_pct), extra: "" },
     { label: "Fat mass", value: fmtKg(latest.fat_mass_kg), extra: "" },
@@ -744,6 +1044,8 @@ async function main() {
     },
   ];
   document.getElementById("overview-cards").innerHTML = cardsHTML(overviewCards);
+  renderPlan(planned, weeklyPlan);
+  renderProgress(rideProgress, runProgress);
 
   const last90 = daily.slice(-90);
   new Chart(document.getElementById("overview-chart"), {

@@ -5,3 +5,7 @@ models:
     columns:
       - name: wellness_date
         tests: [unique, not_null]
+  - name: stg_intervals_events
+    columns:
+      - name: event_id
+        tests: [unique, not_null]

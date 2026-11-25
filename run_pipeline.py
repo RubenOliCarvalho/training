@@ -102,6 +102,20 @@ def main():
         cwd=PROJECT_ROOT,
     )
 
+    print("Refreshing planned workouts (intervals.icu calendar)...")
+    steps_ok &= run_step(
+        "ingest_events",
+        [str(PYTHON), "pipeline/ingest_events.py"],
+        cwd=PROJECT_ROOT,
+    )
+
+    print("Refreshing best power efforts...")
+    steps_ok &= run_step(
+        "ingest_power_bests",
+        [str(PYTHON), "pipeline/ingest_power_bests.py"],
+        cwd=PROJECT_ROOT,
+    )
+
     print("Refreshing weather data...")
     steps_ok &= run_step(
         "ingest_weather",

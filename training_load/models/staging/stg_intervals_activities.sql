@@ -29,5 +29,16 @@ select
     avg_temp_c,
     min_temp_c,
     max_temp_c,
+    {{ sport_family('activity_type') }} as sport_family,
+    -- Progress markers computed by intervals.icu (null where not applicable):
+    -- power_hr_z2 = average watts per heartbeat while HR was in Z2 (rides);
+    -- eftp_w = intervals.icu's rolling FTP estimate after this activity;
+    -- gap_mps = grade-adjusted average speed (runs).
+    (raw_json ->> 'icu_power_hr_z2')::numeric as power_hr_z2,
+    (raw_json ->> 'icu_power_hr_z2_mins')::numeric as power_hr_z2_mins,
+    (raw_json ->> 'icu_variability_index')::numeric as variability_index,
+    (raw_json ->> 'icu_rolling_ftp')::numeric as eftp_w,
+    (raw_json ->> 'gap')::numeric as gap_mps,
+    (raw_json ->> 'paired_event_id')::bigint as paired_event_id,
     pulled_at
 from {{ source('staging', 'intervals_activities_raw') }}

@@ -22,6 +22,10 @@ TABLES = {
     "zones_monthly": "select * from analytics.mart_monthly_zone_times order by month, zone_type, zone",
     "zones_yearly": "select * from analytics.mart_yearly_zone_times order by year, zone_type, zone",
     "activities": "select * from analytics.mart_activity_diary order by start_date_local desc",
+    "planned": "select * from analytics.mart_planned_sessions order by event_date, event_id",
+    "weekly_plan": "select * from analytics.mart_weekly_plan order by week_start",
+    "ride_progress": "select * from analytics.mart_ride_progress order by activity_date",
+    "run_progress": "select * from analytics.mart_run_progress order by activity_date",
 }
 
 

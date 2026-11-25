@@ -52,3 +52,27 @@ models:
     columns:
       - name: zone_key
         tests: [unique, not_null]
+  - name: mart_planned_sessions
+    description: One row per planned workout (intervals.icu calendar) with the activity that fulfilled it and its status relative to the build date.
+    columns:
+      - name: event_id
+        tests: [unique, not_null]
+      - name: status
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ['done', 'missed', 'today', 'upcoming']
+  - name: mart_weekly_plan
+    description: Plan compliance per week from the first planned week to the current week.
+    columns:
+      - name: week_start
+        tests: [unique, not_null]
+  - name: mart_ride_progress
+    columns:
+      - name: activity_id
+        tests: [unique, not_null]
+  - name: mart_run_progress
+    columns:
+      - name: activity_id
+        tests: [unique, not_null]
