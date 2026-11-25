@@ -25,9 +25,6 @@ select
     training_load,
     ctl_intervals,
     atl_intervals,
-    calories,
-    avg_temp_c,
-    min_temp_c,
-    max_temp_c
+    calories
 from {{ ref('stg_intervals_activities') }}
 order by start_date_local desc

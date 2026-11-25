@@ -1,7 +1,16 @@
+-- activity_name: Garmin names GPS activities after the place ("<Place> - <workout>"
+-- or "<Place> <Sport>"). For GPS activities the place is removed; indoor names are
+-- kept. The original name stays in staging.intervals_activities_raw (not exported).
 select
     activity_id,
     athlete_id,
-    name as activity_name,
+    case
+        when not coalesce((raw_json -> 'stream_types') ? 'latlng', false) then trim(name)
+        when position(' - ' in name) > 0 then trim(substr(name, position(' - ' in name) + 3))
+        when name ~* '(road cycling|trail running|running|walking|cycling|hiking|other)\s*$'
+            then initcap(substring(name from '(?i)(road cycling|trail running|running|walking|cycling|hiking|other)\s*$'))
+        else activity_type
+    end as activity_name,  -- location removed from GPS activity names (see comment above the select)
     activity_type,
     source,
     trainer,
@@ -26,9 +35,6 @@ select
     nullif(avg_speed_mps, 0) * 3.6 as avg_speed_kph,
     nullif(avg_cadence, 0) as avg_cadence,
     nullif(calories, 0) as calories,
-    avg_temp_c,
-    min_temp_c,
-    max_temp_c,
     {{ sport_family('activity_type') }} as sport_family,
     -- Progress markers computed by intervals.icu (null where not applicable):
     -- power_hr_z2 = average watts per heartbeat while HR was in Z2 (rides);

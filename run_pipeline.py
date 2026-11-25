@@ -116,13 +116,6 @@ def main():
         cwd=PROJECT_ROOT,
     )
 
-    print("Refreshing weather data...")
-    steps_ok &= run_step(
-        "ingest_weather",
-        [str(PYTHON), "pipeline/ingest_weather.py"],
-        cwd=PROJECT_ROOT,
-    )
-
     print("Loading dbt seeds...")
     steps_ok &= run_step(
         "dbt_seed",

@@ -31,10 +31,7 @@ monthly_agg as (
         round(avg(sleep_hours), 2) as avg_sleep_hours,
         round(avg(sleep_score), 1) as avg_sleep_score,
         round(avg(resting_hr), 1) as avg_resting_hr,
-        round(avg(hrv), 1) as avg_hrv,
-        round(avg(location_temp_max_c), 1) as avg_location_temp_max_c,
-        round(avg(location_temp_min_c), 1) as avg_location_temp_min_c,
-        round(sum(precipitation_mm), 1) as total_precipitation_mm
+        round(avg(hrv), 1) as avg_hrv
     from daily
     group by 1
 

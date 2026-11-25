@@ -4,12 +4,6 @@ with training as (
 
 ),
 
-fixed_weather as (
-
-    select * from {{ ref('stg_weather_daily') }}
-
-),
-
 daily_activity_agg as (
 
     select
@@ -22,20 +16,6 @@ daily_activity_agg as (
          / nullif(sum(moving_time_min) filter (where avg_heartrate is not null), 0)
         as avg_heartrate_weighted
     from {{ ref('stg_intervals_activities') }}
-    group by 1
-
-),
-
-garmin_outdoor_temp as (
-
-    select
-        start_date_local::date as activity_date,
-        avg(avg_temp_c) as garmin_avg_temp_c,
-        min(min_temp_c) as garmin_min_temp_c,
-        max(max_temp_c) as garmin_max_temp_c,
-        count(*) as outdoor_activity_count
-    from {{ ref('stg_intervals_activities') }}
-    where activity_type in ('Ride', 'Run', 'TrailRun')
     group by 1
 
 ),
@@ -144,15 +124,6 @@ select
     end as total_distance_km,
     coalesce(a.total_moving_time_min, 0) as total_moving_time_min,
     a.avg_heartrate_weighted,
-    fw.temp_max_c as location_temp_max_c,
-    fw.temp_min_c as location_temp_min_c,
-    fw.precipitation_mm,
-    fw.wind_speed_max_kmh,
-    fw.weather_code,
-    g.garmin_avg_temp_c,
-    g.garmin_min_temp_c,
-    g.garmin_max_temp_c,
-    g.outdoor_activity_count,
     ect.target_min as exercise_calorie_target_min,
     ect.target_max as exercise_calorie_target_max,
     case
@@ -183,10 +154,6 @@ select
 from training t
 left join daily_activity_agg a
     on a.activity_date = t.calendar_date
-left join fixed_weather fw
-    on fw.weather_date = t.calendar_date
-left join garmin_outdoor_temp g
-    on g.activity_date = t.calendar_date
 left join weight_ffill wf
     on wf.calendar_date = t.calendar_date
 left join recovery r
