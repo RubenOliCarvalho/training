@@ -68,6 +68,31 @@
   .zone-row .zone-pct { color: var(--muted); text-align: right; font-variant-numeric: tabular-nums; }
   .zone-empty { color: var(--muted); font-size: 13px; text-align: center; padding: 12px 0; }
   .status-bad { color: var(--bad); }
+  .status-tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; margin-bottom: 12px; }
+  .status-tile { background: var(--card); border: 1px solid var(--border); border-left: 4px solid var(--muted); border-radius: 8px; padding: 14px 16px; }
+  .status-tile .label { color: var(--muted); font-size: 12px; }
+  .status-tile .status-word { font-size: 20px; font-weight: 600; margin: 4px 0; }
+  .status-tile .sub { color: var(--muted); font-size: 12px; line-height: 1.4; }
+  .status-tile.status-good { border-left-color: var(--good); } .status-tile.status-good .status-word { color: var(--good); }
+  .status-tile.status-warn { border-left-color: var(--warn); } .status-tile.status-warn .status-word { color: var(--warn); }
+  .status-tile.status-bad { border-left-color: var(--bad); } .status-tile.status-bad .status-word { color: var(--bad); }
+  .status-tile.status-neutral { border-left-color: var(--accent); }
+  .week-compare { color: var(--muted); font-size: 13px; margin: 0 0 20px; }
+  .week-compare strong { color: var(--text); font-weight: 500; }
+  .goals { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px; margin-bottom: 20px; }
+  .goal { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; }
+  .goal-head { display: flex; justify-content: space-between; gap: 8px; font-size: 13px; color: var(--muted); }
+  .goal-value { color: var(--text); font-weight: 600; font-size: 16px; white-space: nowrap; }
+  .goal-track { background: var(--border); border-radius: 5px; height: 10px; margin: 10px 0 6px; overflow: hidden; }
+  .goal-fill { background: linear-gradient(90deg, var(--accent), var(--good)); height: 100%; border-radius: 5px; }
+  .goal .sub { color: var(--muted); font-size: 12px; }
+  .pbs { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-bottom: 20px; }
+  .pb { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 12px 14px; }
+  .pb .label { color: var(--muted); font-size: 12px; }
+  .pb .pb-value { font-size: 18px; font-weight: 600; margin: 4px 0; }
+  .pb .sub { color: var(--muted); font-size: 11px; }
+  .pb.pb-new { border-color: var(--good); }
+  .pb.pb-new .label { color: var(--good); }
   .plan-week { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 4px 16px; margin-bottom: 20px; }
   .plan-row { display: grid; grid-template-columns: 28px 70px 1fr auto; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 14px; }
   .plan-row:last-child { border-bottom: none; }
@@ -101,6 +126,13 @@
 
 <main>
   <section id="overview" class="active">
+    <div class="status-tiles" id="overview-status"></div>
+    <p class="week-compare" id="overview-week-compare"></p>
+    <h3 class="section-title">Goals</h3>
+    <div class="goals" id="overview-goals"></div>
+    <h3 class="section-title">Personal bests (🎉 = set in the last 14 days)</h3>
+    <div class="pbs" id="overview-pbs"></div>
+    <h3 class="section-title">Latest numbers</h3>
     <div class="cards" id="overview-cards"></div>
     <div class="chart-box"><canvas id="overview-chart"></canvas></div>
   </section>
@@ -802,7 +834,7 @@ function renderPlan(planned, weeklyPlan) {
   document.getElementById("plan-week").innerHTML = thisWeek.length ? thisWeek.map(s => {
     const st = PLAN_STATUS[s.status] || PLAN_STATUS.upcoming;
     const day = new Date(s.event_date.slice(0, 10) + "T00:00:00Z").toLocaleDateString("default", { weekday: "short", day: "numeric", timeZone: "UTC" });
-    const capBit = s.hr_cap_applies && s.mins_over_hr_cap != null ? ` · ${fmt(s.mins_over_hr_cap)} min over 140` : "";
+    const capBit = s.hr_cap_applies && s.mins_over_hr_cap != null ? ` · ${fmt(s.mins_over_hr_cap)} min over easy cap` : "";
     const detail = s.status === "done"
       ? `${fmt(s.actual_min)} of ${fmt(s.planned_min)} min${s.avg_heartrate ? ` · avg HR ${fmt(s.avg_heartrate)}` : ""}${capBit}`
       : `${fmt(s.planned_min)} min planned`;
@@ -838,7 +870,7 @@ function renderPlan(planned, weeklyPlan) {
     { key: "done_rides", label: "Rides", format: (v, r) => `${v} / ${r.planned_rides}` },
     { key: "done_runs", label: "Runs", format: (v, r) => `${v} / ${r.planned_runs}` },
     { key: "done_minutes", label: "Minutes done / planned (due)", format: (v, r) => `${fmt(v)} / ${fmt(r.planned_due_minutes)}` },
-    { key: "mins_over_hr_cap", label: "Min over 140 (easy)", format: v => v == null ? "—" : fmt(v) },
+    { key: "mins_over_hr_cap", label: "Min over easy cap", format: v => v == null ? "—" : fmt(v) },
     { key: "tennis_sessions", label: "Tennis" },
     { key: "strength_sessions", label: "Strength" },
   ]);
@@ -854,7 +886,7 @@ function renderPlan(planned, weeklyPlan) {
     { key: "actual_min", label: "Actual min", format: v => fmt(v) },
     { key: "duration_pct", label: "% of plan", format: v => v == null ? "—" : `${fmt(v)}%` },
     { key: "avg_heartrate", label: "Avg HR", format: v => fmt(v) },
-    { key: "mins_over_hr_cap", label: "Min over 140", format: (v, r) => capText(r) },
+    { key: "mins_over_hr_cap", label: "Min over easy cap", format: (v, r) => capText(r) },
   ]);
 }
 
@@ -921,7 +953,7 @@ function renderProgress(rides, runs) {
   ]);
 
   progressChart("progress-pwhr-chart", z2, "power_hr_z2", "Watts per heartbeat in HR Z2", "#4f8cff",
-    "Aerobic efficiency on the bike: watts per heartbeat while HR is in Z2 (steady rides, 10+ min in Z2)", { unit: "W/bpm" });
+    "Watts per heartbeat in HR Z2 (steady rides, 10+ min in Z2). Z2 was 127-140 bpm until 25 Nov 2026, 136-148 after: compare within each period", { unit: "W/bpm" });
   progressChart("progress-decoupling-chart", steady, "decoupling", "HR drift (%)", "#ef5350",
     "Heart-rate drift on steady rides (30+ min): lower = stronger aerobic base", { refLine: 5, refLabel: "5% target", unit: "%" });
 
@@ -996,6 +1028,172 @@ function renderProgress(rides, runs) {
   });
 }
 
+// ---------- At-a-glance status and goal progress (Overview) ----------
+
+// Ruben's goals. Weight target set 25 Nov 2026; 10K = finish 10 km on trail,
+// which at his pace is roughly 90 minutes on feet.
+const GOALS = { weightKg: 70, runKm: 10, runMinutes: 90, recentDays: 42 };
+const RUN_TYPES = ["Run", "TrailRun", "VirtualRun"];
+// Some walks were recorded as runs (e.g. "home walking"); keep them out of
+// run goals and bests. "Run/walk" sessions are runs and stay in.
+const isRealRun = a => RUN_TYPES.includes(a.activity_type) && !/\bwalking\b/i.test(a.activity_name || "");
+const RIDE_TYPES = ["Ride", "VirtualRide"];
+
+function meanSd(values) {
+  const v = values.filter(x => x != null).map(Number);
+  if (v.length < 14) return null;
+  const mean = v.reduce((a, b) => a + b, 0) / v.length;
+  const sd = Math.sqrt(v.reduce((s, x) => s + (x - mean) ** 2, 0) / (v.length - 1));
+  return { mean, sd, n: v.length };
+}
+
+// Readiness: the latest HRV and resting HR against your own normal range
+// (mean ± 1 SD of the previous 60 days, excluding the day itself).
+function readinessStatus(daily) {
+  const idx = daily.map((d, i) => (d.hrv != null || d.resting_hr != null ? i : -1)).filter(i => i >= 0).pop();
+  if (idx === undefined) return { level: "na", word: "No data", detail: "No HRV or resting HR yet" };
+  const day = daily[idx];
+  const past = daily.slice(Math.max(0, idx - 60), idx);
+  const hrvBase = meanSd(past.map(d => d.hrv));
+  const rhrBase = meanSd(past.map(d => d.resting_hr));
+  if (!hrvBase || !rhrBase) return { level: "na", word: "Building baseline", detail: "Needs 14+ days of HRV and resting HR" };
+  const hrvLow = day.hrv != null && day.hrv < hrvBase.mean - hrvBase.sd;
+  const rhrHigh = day.resting_hr != null && day.resting_hr > rhrBase.mean + rhrBase.sd;
+  const flags = (hrvLow ? 1 : 0) + (rhrHigh ? 1 : 0);
+  const when = day.calendar_date.slice(0, 10) === daily[daily.length - 1].calendar_date.slice(0, 10) ? "today" : day.calendar_date.slice(5, 10);
+  const detail = `HRV ${fmt(day.hrv)} (normal ${fmt(hrvBase.mean - hrvBase.sd)}–${fmt(hrvBase.mean + hrvBase.sd)}) · ` +
+    `RHR ${fmt(day.resting_hr)} (normal ≤ ${fmt(rhrBase.mean + rhrBase.sd)}) · ${when}`;
+  if (flags === 0) return { level: "good", word: "Recovered", detail };
+  if (flags === 1) return { level: "warn", word: hrvLow ? "HRV below normal" : "Resting HR high", detail: detail + " · keep today easy" };
+  return { level: "bad", word: "Under-recovered", detail: detail + " · consider rest or very easy" };
+}
+
+// Form as a percentage of fitness (TSB / CTL). With a low CTL, absolute TSB
+// bands overstate freshness, so the bands are applied to the percentage:
+// > +20% transition, +5..+20% fresh, -10..+5% neutral, -30..-10% productive,
+// < -30% overreaching.
+function formStatus(latest) {
+  if (latest.ctl == null || latest.tsb == null || !latest.ctl) return { level: "na", word: "No data", detail: "" };
+  const pct = (latest.tsb / latest.ctl) * 100;
+  const detail = `Form ${fmt(latest.tsb, 1)} = ${fmt(pct)}% of fitness ${fmt(latest.ctl, 1)}`;
+  if (pct < -30) return { level: "bad", word: "Overreaching", detail: detail + " · fatigue well above fitness" };
+  if (pct < -10) return { level: "good", word: "Productive", detail: detail + " · building fitness" };
+  if (pct <= 5) return { level: "neutral", word: "Neutral", detail };
+  if (pct <= 20) return { level: "good", word: "Fresh", detail: detail + " · ready for a key session" };
+  return { level: "warn", word: "Detraining", detail: detail + " · load has dropped off" };
+}
+
+function weekStatus(weeklyPlan) {
+  const w = weeklyPlan.find(x => x.is_current_week);
+  if (!w || !w.planned_sessions) return { level: "na", word: "No plan", detail: "No sessions planned this week" };
+  const cap = w.mins_over_hr_cap ? ` · ${fmt(w.mins_over_hr_cap)} min over easy cap` : "";
+  const detail = `${w.done_sessions} of ${w.planned_sessions} done, ${w.remaining_sessions} to go${cap} · tennis ${w.tennis_sessions}`;
+  if (w.missed_sessions >= 2 || w.tennis_sessions > 2) return { level: "bad", word: w.missed_sessions >= 2 ? `${w.missed_sessions} missed` : "Too much tennis", detail };
+  if (w.missed_sessions === 1) return { level: "warn", word: "1 missed", detail };
+  return { level: "good", word: "On track", detail };
+}
+
+function nextSession(planned) {
+  const s = planned.find(p => p.status === "today" || p.status === "upcoming");
+  if (!s) return { level: "na", word: "Nothing planned", detail: "Push the next block" };
+  const day = s.status === "today" ? "Today" :
+    new Date(s.event_date.slice(0, 10) + "T00:00:00Z").toLocaleDateString("default", { weekday: "long", day: "numeric", month: "short", timeZone: "UTC" });
+  return { level: "neutral", word: day, detail: `${escapeHTML(s.event_name)} · ${fmt(s.planned_min)} min` };
+}
+
+function statusTilesHTML(tiles) {
+  return tiles.map(t => `<div class="status-tile status-${t.level}"><div class="label">${t.label}</div>` +
+    `<div class="status-word">${t.word}</div><div class="sub">${t.detail}</div></div>`).join("");
+}
+
+// This week so far vs the same days of last week (Mon..today's weekday).
+function weekComparison(daily, activities) {
+  const today = daily[daily.length - 1].calendar_date.slice(0, 10);
+  const dow = (new Date(today + "T00:00:00Z").getUTCDay() + 6) % 7; // Mon = 0
+  const thisStart = addDaysISO(today, -dow), lastStart = addDaysISO(thisStart, -7), lastEnd = addDaysISO(today, -7);
+  const sum = (from, to) => {
+    const days = daily.filter(d => d.calendar_date.slice(0, 10) >= from && d.calendar_date.slice(0, 10) <= to);
+    const acts = activities.filter(a => a.activity_date.slice(0, 10) >= from && a.activity_date.slice(0, 10) <= to);
+    return {
+      sessions: acts.length,
+      hours: days.reduce((s, d) => s + (d.total_moving_time_min || 0), 0) / 60,
+      load: days.reduce((s, d) => s + (d.daily_training_load || 0), 0),
+      tennis: acts.filter(a => a.activity_type === "Tennis").length,
+    };
+  };
+  const a = sum(thisStart, today), b = sum(lastStart, lastEnd);
+  const delta = (x, y, digits = 0) => { const d = x - y; return `${d > 0 ? "+" : d < 0 ? "−" : "±"}${Math.abs(d).toFixed(digits)}`; };
+  const dayName = new Date(today + "T00:00:00Z").toLocaleDateString("default", { weekday: "long", timeZone: "UTC" });
+  return `<strong>This week so far vs last week to ${dayName}:</strong> ` +
+    `${a.sessions} sessions (${delta(a.sessions, b.sessions)}) · ${a.hours.toFixed(1)} h (${delta(a.hours, b.hours, 1)}) · ` +
+    `load ${fmt(a.load)} (${delta(a.load, b.load)}) · tennis ${a.tennis} (${delta(a.tennis, b.tennis)})`;
+}
+
+function goalBarHTML(label, value, pct, sub) {
+  const p = Math.max(0, Math.min(100, pct));
+  return `<div class="goal"><div class="goal-head"><span>${label}</span><span class="goal-value">${value}</span></div>` +
+    `<div class="goal-track"><div class="goal-fill" style="width:${p}%"></div></div><div class="sub">${sub}</div></div>`;
+}
+
+function renderGoals(daily, activities, weightTrend) {
+  const parts = [];
+  // Weight: from the heaviest weigh-in of the last 12 months to the target.
+  const lastDay = daily[daily.length - 1].calendar_date.slice(0, 10);
+  const yearAgo = addDaysISO(lastDay, -365);
+  const weighIns = daily.filter(d => d.is_weigh_in_day && d.weight_kg != null && d.calendar_date.slice(0, 10) >= yearAgo);
+  if (weighIns.length) {
+    const start = weighIns.reduce((m, d) => (Number(d.weight_kg) > Number(m.weight_kg) ? d : m));
+    const current = Number(weighIns[weighIns.length - 1].weight_kg);
+    const total = Number(start.weight_kg) - GOALS.weightKg, done = Number(start.weight_kg) - current;
+    const nextMilestone = Math.floor((current - 0.01) / 5) * 5;
+    let eta = "";
+    if (weightTrend && weightTrend.perWeek < 0) {
+      const weeks = (current - GOALS.weightKg) / -weightTrend.perWeek;
+      eta = ` · at ${fmt(-weightTrend.perWeek, 2)} kg/week: ${nextMilestone} kg in ~${Math.ceil((current - nextMilestone) / -weightTrend.perWeek)} wk, goal in ~${Math.ceil(weeks)} wk`;
+    }
+    parts.push(goalBarHTML(`Weight: ${fmt(start.weight_kg, 1)} → ${GOALS.weightKg} kg`, `${fmt(current, 1)} kg`, (done / total) * 100,
+      `${fmt(done, 1)} of ${fmt(total, 1)} kg lost (${fmt((done / total) * 100)}%) since ${start.calendar_date.slice(0, 10)}${eta}`));
+  }
+  // 10K: longest run distance and time on feet in the last 6 weeks (current ability).
+  const since = addDaysISO(lastDay, -GOALS.recentDays);
+  const runs = activities.filter(a => isRealRun(a) && a.activity_date.slice(0, 10) >= since);
+  const longestKm = maxBy(runs.filter(r => r.distance_km), "distance_km");
+  const longestMin = maxBy(runs, "moving_time_min");
+  parts.push(goalBarHTML(`Trail 10K: longest run, last ${GOALS.recentDays / 7} weeks`, longestKm ? `${fmt(longestKm.distance_km, 1)} km` : "—",
+    longestKm ? (longestKm.distance_km / GOALS.runKm) * 100 : 0,
+    longestKm ? `${fmt((longestKm.distance_km / GOALS.runKm) * 100)}% of ${GOALS.runKm} km · ${longestKm.activity_date.slice(0, 10)}` : "No runs in the last 6 weeks"));
+  parts.push(goalBarHTML(`Trail 10K: longest time on feet, last ${GOALS.recentDays / 7} weeks`, longestMin ? `${fmt(longestMin.moving_time_min)} min` : "—",
+    longestMin ? (longestMin.moving_time_min / GOALS.runMinutes) * 100 : 0,
+    `target ~${GOALS.runMinutes} min, roughly what 10 km of trail takes at your pace`));
+  document.getElementById("overview-goals").innerHTML = parts.join("");
+}
+
+// Personal bests across the whole history; 🎉 when set in the last 14 days.
+function renderPersonalBests(activities, rides) {
+  const lastDay = activities.reduce((m, a) => (a.activity_date > m ? a.activity_date : m), "").slice(0, 10);
+  const recent = d => d && d.slice(0, 10) >= addDaysISO(lastDay, -14);
+  const runs = activities.filter(isRealRun);
+  const rideActs = activities.filter(a => RIDE_TYPES.includes(a.activity_type));
+  const pick = (items, key, better = "max") => items.filter(x => x[key] != null)
+    .reduce((m, x) => (m == null || (better === "max" ? Number(x[key]) > Number(m[key]) : Number(x[key]) < Number(m[key])) ? x : m), null);
+  const z2 = rides.filter(r => r.z2_marker_valid), steady = rides.filter(r => r.decoupling_valid);
+  const rows = [
+    ["Longest run", pick(runs, "distance_km"), r => `${fmt(r.distance_km, 2)} km`],
+    ["Longest run (time)", pick(runs, "moving_time_min"), r => `${fmt(r.moving_time_min)} min`],
+    ["Longest ride (time)", pick(rideActs, "moving_time_min"), r => `${fmt(r.moving_time_min)} min`],
+    ["Best 1-min power", pick(rides, "best_1m_w"), r => `${fmt(r.best_1m_w)} W`],
+    ["Best 5-min power", pick(rides, "best_5m_w"), r => `${fmt(r.best_5m_w)} W`],
+    ["Best 20-min power", pick(rides, "best_20m_w"), r => `${fmt(r.best_20m_w)} W`],
+    ["Best watts per heartbeat (Z2)", pick(z2, "power_hr_z2"), r => `${fmt(r.power_hr_z2, 2)} W/bpm`],
+    ["Lowest HR drift (steady ride)", pick(steady.filter(r => r.decoupling >= 0), "decoupling", "min"), r => `${fmt(r.decoupling, 1)}%`],
+  ].filter(([, r]) => r);
+  document.getElementById("overview-pbs").innerHTML = rows.map(([label, r, f]) => {
+    const isNew = recent(r.activity_date);
+    return `<div class="pb${isNew ? " pb-new" : ""}"><div class="label">${isNew ? "🎉 New · " : ""}${label}</div>` +
+      `<div class="pb-value">${f(r)}</div><div class="sub">${r.activity_date.slice(0, 10)} · ${escapeHTML(r.activity_name)}</div></div>`;
+  }).join("");
+}
+
 async function main() {
   const [daily, weekly, monthly, yearly, activities, zonesMonthly, zonesYearly] = await Promise.all([
     loadJSON("daily"), loadJSON("weekly"), loadJSON("monthly"), loadJSON("yearly"), loadJSON("activities"),
@@ -1021,7 +1219,6 @@ async function main() {
   }
   const weightTrend = weightTrendFit(daily);
   const overviewCards = [
-    planWeekCard(weeklyPlan),
     { label: "Weight", value: latest.weight_kg ? `${fmt(latest.weight_kg, 1)} kg` : "—", sub: weightTrend ? weightTrend.short : "", extra: "" },
     { label: "Body fat", value: fmtPct(latest.body_fat_pct), extra: "" },
     { label: "Fat mass", value: fmtKg(latest.fat_mass_kg), extra: "" },
@@ -1046,6 +1243,15 @@ async function main() {
   document.getElementById("overview-cards").innerHTML = cardsHTML(overviewCards);
   renderPlan(planned, weeklyPlan);
   renderProgress(rideProgress, runProgress);
+  document.getElementById("overview-status").innerHTML = statusTilesHTML([
+    { label: "Readiness (HRV & resting HR vs your normal)", ...readinessStatus(daily) },
+    { label: "Form (fatigue vs fitness)", ...formStatus(latest) },
+    { label: "This week's plan", ...weekStatus(weeklyPlan) },
+    { label: "Next session", ...nextSession(planned) },
+  ]);
+  document.getElementById("overview-week-compare").innerHTML = weekComparison(daily, activities);
+  renderGoals(daily, activities, weightTrend);
+  renderPersonalBests(activities, rideProgress);
 
   const last90 = daily.slice(-90);
   new Chart(document.getElementById("overview-chart"), {

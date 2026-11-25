@@ -40,7 +40,7 @@ workouts:
     name: "Bike W9 Fri - Endurance + tempo finish"
     type: VirtualRide
     description: |
-      Aerobic endurance (EnduranceMiles): conversational, steady; you could ride like this for hours. Ride to heart rate: if HR goes above 140, let the watts drop until it settles. FastPedal: high cadence, smooth and quiet upper body, no bouncing.
+      Aerobic endurance (EnduranceMiles): conversational, steady; you could ride like this for hours. Ride to heart rate: if HR goes above 148, let the watts drop until it settles. FastPedal: high cadence, smooth and quiet upper body, no bouncing.
 
       Warmup
       - Warm up 10m ramp 45%-65% 90rpm
@@ -91,7 +91,7 @@ workouts:
     name: "Bike W10 Fri - Endurance + tempo finish"
     type: VirtualRide
     description: |
-      Aerobic endurance (EnduranceMiles): conversational, steady; you could ride like this for hours. Ride to heart rate: if HR goes above 140, let the watts drop until it settles. FastPedal: high cadence, smooth and quiet upper body, no bouncing.
+      Aerobic endurance (EnduranceMiles): conversational, steady; you could ride like this for hours. Ride to heart rate: if HR goes above 148, let the watts drop until it settles. FastPedal: high cadence, smooth and quiet upper body, no bouncing.
 
       Warmup
       - Warm up 10m ramp 45%-65% 90rpm
@@ -142,7 +142,7 @@ workouts:
     name: "Bike W11 Fri - Endurance + tempo finish"
     type: VirtualRide
     description: |
-      Aerobic endurance (EnduranceMiles): conversational, steady; you could ride like this for hours. Ride to heart rate: if HR goes above 140, let the watts drop until it settles. FastPedal: high cadence, smooth and quiet upper body, no bouncing.
+      Aerobic endurance (EnduranceMiles): conversational, steady; you could ride like this for hours. Ride to heart rate: if HR goes above 148, let the watts drop until it settles. FastPedal: high cadence, smooth and quiet upper body, no bouncing.
 
       Warmup
       - Warm up 10m ramp 45%-65% 90rpm

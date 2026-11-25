@@ -28,7 +28,8 @@ activities as (
 
 ),
 
--- Minutes above the easy cap (HR Z3 and up = above 140 bpm with current zones).
+-- Minutes above the easy cap = HR Z3 and up, using the zones intervals.icu applied to
+-- that activity (above 140 bpm until 25 Nov 2026, above 148 after the zone update).
 hr_over_cap as (
 
     select

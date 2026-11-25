@@ -65,7 +65,7 @@ RAMP_TEST = "\n".join([
 ])
 
 N_END = ("Aerobic endurance (EnduranceMiles): conversational, steady; you could ride like this for hours. "
-         "Ride to heart rate: if HR goes above 140, let the watts drop until it settles. "
+         "Ride to heart rate: if HR goes above 148, let the watts drop until it settles. "
          "FastPedal: high cadence, smooth and quiet upper body, no bouncing.")
 N_FORCE = ("Force (seated climbing): low cadence, high torque. Stay seated, steady pedal stroke; "
            "stop a rep if knees complain.")

@@ -43,7 +43,7 @@ workouts:
   - date: 2027-01-23
     name: "10K W9 Sat - Long run/walk"
     description: |
-      Long trail session: time on feet matters, not pace. Hike every climb, walk technical descents, walk 1 min whenever HR goes above 140.
+      Long trail session: time on feet matters, not pace. Hike every climb, walk technical descents, walk 1 min whenever HR goes above 148.
 
       Warmup
       - Brisk walk 5m
@@ -95,7 +95,7 @@ workouts:
   - date: 2027-01-30
     name: "10K W10 Sat - Long run/walk"
     description: |
-      Long trail session: time on feet matters, not pace. Hike every climb, walk technical descents, walk 1 min whenever HR goes above 140.
+      Long trail session: time on feet matters, not pace. Hike every climb, walk technical descents, walk 1 min whenever HR goes above 148.
 
       Warmup
       - Brisk walk 5m
@@ -133,7 +133,7 @@ workouts:
   - date: 2027-02-04
     name: "10K W11 Thu - Easy run"
     description: |
-      Easy: stay conversational; if HR goes above 140, slow down or walk until it settles. Hike any steep climb.
+      Easy: stay conversational; if HR goes above 148, slow down or walk until it settles. Hike any steep climb.
 
       Warmup
       - Brisk walk 5m
@@ -146,7 +146,7 @@ workouts:
   - date: 2027-02-06
     name: "10K W11 Sat - Long run/walk"
     description: |
-      Long trail session: time on feet matters, not pace. Hike every climb, walk technical descents, walk 1 min whenever HR goes above 140.
+      Long trail session: time on feet matters, not pace. Hike every climb, walk technical descents, walk 1 min whenever HR goes above 148.
 
       Warmup
       - Brisk walk 5m
@@ -190,7 +190,7 @@ workouts:
   - date: 2027-02-13
     name: "10K W12 Sat - Benchmark 30 min"
     description: |
-      Benchmark: 30 min continuous at HR <= 140. Note the distance; we repeat this later to measure aerobic progress.
+      Benchmark: 30 min continuous at HR <= 148. Note the distance; we repeat this later to measure aerobic progress.
 
       Warmup
       - Brisk walk 5m

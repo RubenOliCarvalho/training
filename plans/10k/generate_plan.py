@@ -4,7 +4,7 @@ Goal: FINISH 10 km on trail (no race date, no time goal). Method: run/walk
 progression (Galloway-style walk breaks) inside Friel-style periodization
 (3 load weeks + 1 recovery week). No threshold/cruise intervals: the only
 intensity is short hill repeats and strides. Trail rules in every session:
-hike the climbs, walk technical descents, HR <= 140 on the flats.
+hike the climbs, walk technical descents, HR <= 148 (top of Z2) on the flats.
 Week 20 is the 10K finish attempt; the date is flexible: if a long session
 felt hard, repeat that week before moving on.
 """
@@ -13,7 +13,7 @@ from pathlib import Path
 
 OUT = Path(r'C:\Users\ruben\OneDrive\10_dev\training-load-forecast\plans\10k')
 START_MONDAY = date(2026, 11, 23)  # week 1
-EASY = "Z1-Z2 HR"                   # <= 140 bpm with current intervals.icu zones
+EASY = "Z1-Z2 HR"                   # <= 148 bpm since 25 Nov 2026 (max 183, LTHR 167); was 140
 
 
 def d(sec):
@@ -63,8 +63,8 @@ def race(note):
     return body, 100
 
 
-N_EASY = "Easy: stay conversational; if HR goes above 140, slow down or walk until it settles. Hike any steep climb."
-N_LONG = "Long trail session: time on feet matters, not pace. Hike every climb, walk technical descents, walk 1 min whenever HR goes above 140."
+N_EASY = "Easy: stay conversational; if HR goes above 148, slow down or walk until it settles. Hike any steep climb."
+N_LONG = "Long trail session: time on feet matters, not pace. Hike every climb, walk technical descents, walk 1 min whenever HR goes above 148."
 N_RW = "Run/walk: walk breaks are part of the plan, not a failure. Short, light steps; hike the climbs, walk technical descents."
 N_REC = "Recovery week: less volume so the last three weeks sink in."
 
@@ -88,11 +88,11 @@ wk(9, 3, runwalk(N_RW, 4, 360, 60, strides=True, drills=True), runwalk(N_RW, 4, 
 wk(10, 3, runwalk(N_RW, 3, 480, 60, strides=True, drills=True), runwalk(N_RW, 3, 480, 60), runwalk(N_LONG, 4, 480, 60))
 wk(11, 3, runwalk(N_RW, 3, 600, 60, strides=True, drills=True), continuous(N_EASY, 20), runwalk(N_LONG, 4, 600, 60))
 wk(12, 3, continuous(N_REC, 20, strides=True), continuous(N_REC, 20),
-   continuous("Benchmark: 30 min continuous at HR <= 140. Note the distance; we repeat this later to measure aerobic progress.", 30))
+   continuous("Benchmark: 30 min continuous at HR <= 148. Note the distance; we repeat this later to measure aerobic progress.", 30))
 N_HILL = ("Hills: run (or power-hike if it is steep) up a 4-8% slope, strong but controlled, "
           "tall posture, short quick steps. Walk back down. HR can go into Z3 on the climbs.")
 N_10K = ("Trail 10K finish. Start slower than feels necessary, hike every climb, walk technical descents, "
-         "walk 1 min whenever HR goes above 140 on the flats. Finishing is the goal; pace doesn't matter.")
+         "walk 1 min whenever HR goes above 148 on the flats. Finishing is the goal; pace doesn't matter.")
 # Block 4: Build 1 (continuous running, hill strength, long sessions on trail)
 wk(13, 4, hills(N_HILL, 6, 45), continuous(N_EASY, 25), continuous(N_LONG, 45))
 wk(14, 4, hills(N_HILL, 8, 45, strides=True), continuous(N_EASY, 30), continuous(N_LONG, 50))
@@ -102,7 +102,7 @@ wk(16, 4, hills(N_REC, 4, 45), continuous(N_REC, 25), continuous(N_REC, 40))
 wk(17, 5, hills(N_HILL, 8, 60), continuous(N_EASY, 35, strides=True), continuous(N_LONG, 70))
 wk(18, 5, hills(N_HILL, 6, 90), continuous(N_EASY, 35), continuous(N_LONG, 80))
 wk(19, 5, hills("Taper starts: same hills, less volume.", 4, 60),
-   continuous("Benchmark repeat: 30 min continuous at HR <= 140 on the same route as week 12; compare distance.", 30),
+   continuous("Benchmark repeat: 30 min continuous at HR <= 148 on the same route as week 12; compare distance.", 30),
    continuous(N_LONG, 50))
 # Block 6: 10K week
 wk(20, 6, continuous("Easy run, legs fresh for Saturday.", 25, strides=True), continuous("Shake-out: very easy, legs only.", 20),

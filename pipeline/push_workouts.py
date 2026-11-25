@@ -147,9 +147,13 @@ def main():
     group.add_argument("--dry-run", action="store_true", help="print what would be sent; send nothing")
     group.add_argument("--delete", action="store_true", help="remove this plan's workouts from the calendar")
     group.add_argument("--fit", action="store_true", help="push, then save each workout as a .fit file")
+    parser.add_argument("--from", dest="from_date", type=date.fromisoformat,
+                        help="only workouts on/after this date (YYYY-MM-DD), e.g. to re-push the rest of a block")
     args = parser.parse_args()
 
     plan_id, events = load_plan(args.plan_file)
+    if args.from_date:
+        events = [e for e in events if e["start_date_local"][:10] >= args.from_date.isoformat()]
     if args.dry_run:
         for e in events:
             print(f"{e['start_date_local'][:10]}  {e['type']:<5} {e['name']}  [{e['external_id']}]")

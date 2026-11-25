@@ -19,7 +19,7 @@ workouts:
   - date: 2027-02-18
     name: "10K W13 Thu - Easy run"
     description: |
-      Easy: stay conversational; if HR goes above 140, slow down or walk until it settles. Hike any steep climb.
+      Easy: stay conversational; if HR goes above 148, slow down or walk until it settles. Hike any steep climb.
 
       Warmup
       - Brisk walk 5m
@@ -32,7 +32,7 @@ workouts:
   - date: 2027-02-20
     name: "10K W13 Sat - Long run"
     description: |
-      Long trail session: time on feet matters, not pace. Hike every climb, walk technical descents, walk 1 min whenever HR goes above 140.
+      Long trail session: time on feet matters, not pace. Hike every climb, walk technical descents, walk 1 min whenever HR goes above 148.
 
       Warmup
       - Brisk walk 5m
@@ -63,7 +63,7 @@ workouts:
   - date: 2027-02-25
     name: "10K W14 Thu - Easy run"
     description: |
-      Easy: stay conversational; if HR goes above 140, slow down or walk until it settles. Hike any steep climb.
+      Easy: stay conversational; if HR goes above 148, slow down or walk until it settles. Hike any steep climb.
 
       Warmup
       - Brisk walk 5m
@@ -76,7 +76,7 @@ workouts:
   - date: 2027-02-27
     name: "10K W14 Sat - Long run"
     description: |
-      Long trail session: time on feet matters, not pace. Hike every climb, walk technical descents, walk 1 min whenever HR goes above 140.
+      Long trail session: time on feet matters, not pace. Hike every climb, walk technical descents, walk 1 min whenever HR goes above 148.
 
       Warmup
       - Brisk walk 5m
@@ -103,7 +103,7 @@ workouts:
   - date: 2027-03-04
     name: "10K W15 Thu - Easy run + strides"
     description: |
-      Easy: stay conversational; if HR goes above 140, slow down or walk until it settles. Hike any steep climb.
+      Easy: stay conversational; if HR goes above 148, slow down or walk until it settles. Hike any steep climb.
 
       Warmup
       - Brisk walk 5m
@@ -120,7 +120,7 @@ workouts:
   - date: 2027-03-06
     name: "10K W15 Sat - Long run"
     description: |
-      Long trail session: time on feet matters, not pace. Hike every climb, walk technical descents, walk 1 min whenever HR goes above 140.
+      Long trail session: time on feet matters, not pace. Hike every climb, walk technical descents, walk 1 min whenever HR goes above 148.
 
       Warmup
       - Brisk walk 5m
