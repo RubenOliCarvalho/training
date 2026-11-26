@@ -116,6 +116,13 @@ def main():
         cwd=PROJECT_ROOT,
     )
 
+    print("Refreshing session time series...")
+    steps_ok &= run_step(
+        "ingest_streams",
+        [str(PYTHON), "pipeline/ingest_streams.py"],
+        cwd=PROJECT_ROOT,
+    )
+
     print("Loading dbt seeds...")
     steps_ok &= run_step(
         "dbt_seed",

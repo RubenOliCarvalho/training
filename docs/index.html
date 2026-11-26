@@ -115,6 +115,21 @@
   .plan-detail { display: block; color: var(--muted); font-size: 12px; margin-top: 2px; }
   .plan-status { font-size: 12px; }
   @media (max-width: 640px) { .plan-row { grid-template-columns: 24px 56px 1fr; } .plan-status { display: none; } }
+  .session { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; margin-bottom: 20px; }
+  .session-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 10px; }
+  .session-head h3 { margin: 0; font-size: 15px; }
+  .session-picker { display: flex; flex-wrap: wrap; gap: 6px; }
+  .session-picker button { background: var(--bg); border: 1px solid var(--border); color: var(--muted); border-radius: 6px; padding: 5px 10px; font-size: 12px; cursor: pointer; }
+  .session-picker button.active { color: var(--text); border-color: var(--accent); }
+  .session-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 8px 16px; margin-bottom: 8px; }
+  .session-stats .label { color: var(--muted); font-size: 11px; }
+  .session-stats .value { font-size: 16px; font-weight: 600; font-variant-numeric: tabular-nums; }
+  .session-chart { position: relative; height: 380px; }
+  .session .note { color: var(--muted); font-size: 12px; margin: 8px 0 0; line-height: 1.4; }
+  .session .empty { color: var(--muted); font-size: 13px; padding: 12px 0; }
+  .session table { margin-top: 12px; border: none; }
+  .session td, .session th { font-variant-numeric: tabular-nums; padding: 6px 8px; }
+  @media (max-width: 640px) { .session-chart { height: 320px; } }
 </style>
 </head>
 <body>
@@ -180,6 +195,14 @@
       <button id="daily-summary-next">›</button>
     </div>
     <div class="cards" id="daily-summary-cards"></div>
+
+    <div class="session" id="session" hidden>
+      <div class="session-head">
+        <h3 id="session-title">Session detail</h3>
+        <div class="session-picker" id="session-picker"></div>
+      </div>
+      <div id="session-body"></div>
+    </div>
 
     <div class="chart-box"><canvas id="daily-chart"></canvas></div>
     <div class="chart-box"><canvas id="daily-minutes-chart"></canvas></div>
@@ -1257,6 +1280,228 @@ function renderPersonalBests(activities, rides) {
   }).join("");
 }
 
+// ---------- Session detail (Daily tab): one activity's time series ----------
+// Streams are 5-second averages in docs/data/streams/<activity_id>.js (written
+// by export_dashboard_data.py), loaded on demand with a <script> tag so this
+// also works when the page is opened from disk. No GPS track is published;
+// elevation is relative to the start.
+let STREAM_IDS = new Set();
+let STREAMS_VERSION = "";
+let sessionChart = null;
+let sessionSelected = null;
+let sessionToken = 0;
+const EASY_HR_CAP = 148;             // top of Z2 since 25 Nov 2026
+const ZONES_CHANGED = "2026-11-25";  // max HR 173 -> 183; HR before this is capped at 173
+
+const isFootSport = a => /Run|Walk|Hike/.test(a.activity_type);
+
+function loadStreams(id) {
+  if (window.STREAMS && window.STREAMS[id]) return Promise.resolve(window.STREAMS[id]);
+  return new Promise((resolve, reject) => {
+    const el = document.createElement("script");
+    el.src = `${DATA_BASE}/streams/${id}.js?v=${STREAMS_VERSION}`;
+    el.onload = () => (window.STREAMS && window.STREAMS[id]) ? resolve(window.STREAMS[id]) : reject(new Error("Session data file is empty."));
+    el.onerror = () => reject(new Error("Couldn't load this session's data file."));
+    document.head.appendChild(el);
+  });
+}
+
+function fmtClock(secs) {
+  secs = Math.round(secs);
+  const h = Math.floor(secs / 3600), m = Math.floor((secs % 3600) / 60), s = secs % 60;
+  const pad = n => String(n).padStart(2, "0");
+  return h ? `${h}:${pad(m)}:${pad(s)}` : `${m}:${pad(s)}`;
+}
+
+// Centred rolling mean that skips nulls (GPS speed is noisy at 5-second resolution).
+function rollingMean(values, size) {
+  const half = Math.floor(size / 2);
+  return values.map((_, i) => {
+    let sum = 0, n = 0;
+    for (let j = Math.max(0, i - half); j <= Math.min(values.length - 1, i + half); j++) {
+      if (values[j] != null) { sum += values[j]; n++; }
+    }
+    return n ? sum / n : null;
+  });
+}
+
+// Below 0.75 m/s (~22 min/km) counts as standing still: no pace.
+const speedToPace = v => (v != null && v > 0.75 ? 1000 / v / 60 : null);
+
+// Shades every other lap/interval behind the lines (run/walk reps, workout steps).
+const lapShading = {
+  id: "lapShading",
+  beforeDatasetsDraw(chart, args, opts) {
+    const laps = opts.laps || [];
+    if (laps.length < 2) return;
+    const { ctx, chartArea: area, scales: { x } } = chart;
+    ctx.save();
+    ctx.fillStyle = "rgba(255,255,255,0.05)";
+    laps.forEach((lap, i) => {
+      if (i % 2) return;
+      const x0 = Math.max(area.left, x.getPixelForValue(lap.start / 60));
+      const x1 = Math.min(area.right, x.getPixelForValue(lap.end / 60));
+      if (x1 > x0) ctx.fillRect(x0, area.top, x1 - x0, area.bottom - area.top);
+    });
+    ctx.restore();
+  },
+};
+
+function renderSession(acts) {
+  const box = document.getElementById("session");
+  const body = document.getElementById("session-body");
+  const token = ++sessionToken;
+  if (sessionChart) { sessionChart.destroy(); sessionChart = null; }
+  const list = [...acts].sort((a, b) => a.start_date_local.localeCompare(b.start_date_local));
+  if (!list.length) { box.hidden = true; return; }
+  box.hidden = false;
+
+  // Default to the longest session with recorded data.
+  if (!list.some(a => a.activity_id === sessionSelected)) {
+    const withData = list.filter(a => STREAM_IDS.has(a.activity_id));
+    sessionSelected = (withData.length ? withData : list)
+      .reduce((best, a) => ((a.moving_time_min || 0) > (best.moving_time_min || 0) ? a : best)).activity_id;
+  }
+  const picker = document.getElementById("session-picker");
+  picker.innerHTML = list.length < 2 ? "" : list.map(a =>
+    `<button data-id="${a.activity_id}" class="${a.activity_id === sessionSelected ? "active" : ""}">` +
+    `${ACTIVITY_ICONS[a.activity_type] || "•"} ${a.start_date_local.slice(11, 16)} ${escapeHTML(a.activity_name)}</button>`).join("");
+  picker.querySelectorAll("button").forEach(b => b.addEventListener("click", () => {
+    sessionSelected = b.dataset.id;
+    renderSession(acts);
+  }));
+
+  const act = list.find(a => a.activity_id === sessionSelected);
+  document.getElementById("session-title").textContent = `Session detail · ${act.activity_name}`;
+  if (!STREAM_IDS.has(act.activity_id)) {
+    body.innerHTML = `<p class="empty">No recorded time series for this activity (manual entry or no sensor data).</p>`;
+    return;
+  }
+  body.innerHTML = `<p class="empty">Loading…</p>`;
+  loadStreams(act.activity_id)
+    .then(s => { if (token === sessionToken) drawSession(act, s); })
+    .catch(err => { if (token === sessionToken) body.innerHTML = `<p class="empty">${escapeHTML(err.message)}</p>`; });
+}
+
+function drawSession(act, s) {
+  const body = document.getElementById("session-body");
+  const foot = isFootSport(act);
+  const n = s.t.length;
+  const mins = s.t.map(t => t / 60);
+  const pts = arr => arr.map((y, i) => ({ x: mins[i], y }));
+  const hasPower = !!s.watts && s.watts.some(w => w > 0);
+  // Garmin records running cadence per leg; steps per minute = 2 x that.
+  const cadence = s.cadence ? s.cadence.map(c => (c == null ? null : foot ? c * 2 : c)) : null;
+  const pace = s.speed ? rollingMean(s.speed, 7).map(speedToPace) : null;  // ~30 s average
+
+  const hrSamples = (s.hr || []).filter(v => v != null).length;
+  const overCapSecs = (s.hr || []).filter(v => v != null && v > EASY_HR_CAP).length * s.sample_secs;
+  const stats = [
+    ["Duration", fmtClock((act.moving_time_min || 0) * 60)],
+    ["Distance", act.distance_km ? `${fmt(act.distance_km, 2)} km` : "—"],
+    ["Avg / max HR", act.avg_heartrate ? `${fmt(act.avg_heartrate)} / ${fmt(act.max_heartrate)}` : "—"],
+    [`Above ${EASY_HR_CAP} bpm`, hrSamples ? `${fmtClock(overCapSecs)} (${fmt((100 * overCapSecs) / (hrSamples * s.sample_secs))}%)` : "—"],
+    // Moving time / distance, the same as the Avg pace card above.
+    ...(foot ? [
+      ["Avg pace", act.distance_km ? formatPace(act.moving_time_min / act.distance_km) : "—"],
+      ["Climbing", act.elevation_gain_m ? `${fmt(act.elevation_gain_m)} m` : "—"],
+    ] : /Ride/.test(act.activity_type) ? [
+      ["Avg / NP power", act.avg_watts ? `${fmt(act.avg_watts)} / ${fmt(act.weighted_avg_watts)} W` : "—"],
+      ["HR drift", act.decoupling != null ? `${fmt(act.decoupling, 1)}%` : "—"],
+    ] : [
+      ["Calories", act.calories ? fmt(act.calories) : "—"],
+    ]),
+    ["Load", fmt(act.training_load)],
+  ];
+
+  const line = (label, data, color, axis, hidden, extra = {}) => ({
+    label, data, borderColor: color, backgroundColor: color, yAxisID: axis, hidden,
+    borderWidth: 1.5, pointRadius: 0, pointHitRadius: 4, tension: 0.2, ...extra,
+  });
+  const datasets = [];
+  if (s.hr) {
+    datasets.push(line("Heart rate (bpm)", pts(s.hr), "#ef5350", "yHr", false));
+    // Same length as the other series so the index-mode tooltip lines up.
+    datasets.push(line(`Easy cap ${EASY_HR_CAP}`, pts(s.t.map(() => EASY_HR_CAP)), "#3ecf8e", "yHr", false,
+      { borderDash: [6, 4], borderWidth: 1, isRef: true }));
+  }
+  if (pace && foot) datasets.push(line("Pace (min/km)", pts(pace), "#4f8cff", "yPace", false));
+  if (s.speed && !foot) datasets.push(line("Speed (km/h)", pts(s.speed.map(v => (v == null ? null : v * 3.6))), "#4f8cff", "ySpeed", true));
+  if (hasPower) datasets.push(line(foot ? "Power (W, watch estimate)" : "Power (W)", pts(s.watts), "#f5a623", "yPower", foot));
+  if (cadence) datasets.push(line(foot ? "Cadence (spm)" : "Cadence (rpm)", pts(cadence), "#b388ff", "yCad", true));
+  if (s.elev) datasets.push(line("Elevation (m vs start)", pts(s.elev), "#9aa1ab", "yElev", !foot,
+    { fill: "start", borderColor: "rgba(154,161,171,0.5)", backgroundColor: "rgba(154,161,171,0.08)", borderWidth: 1 }));
+  if (s.temp) datasets.push(line("Device temp (°C)", pts(s.temp), "#26c6da", "yTemp", true));
+  // E.g. a ride that only recorded temperature: show whatever there is.
+  if (datasets.length && !datasets.some(d => !d.hidden)) datasets[0].hidden = false;
+
+  const side = (title, extra = {}) => ({ type: "linear", position: "right", display: "auto", grid: { drawOnChartArea: false }, title: { display: true, text: title }, ...extra });
+  const allScales = {
+    x: { type: "linear", min: 0, max: mins[n - 1], title: { display: true, text: "Elapsed time" }, ticks: { callback: v => fmtClock(v * 60) } },
+    yHr: { type: "linear", position: "left", display: "auto", title: { display: true, text: "bpm" } },
+    yPace: side("min/km", { reverse: true, ticks: { callback: v => formatPace(v).replace(" /km", "") } }),
+    ySpeed: side("km/h", { min: 0 }),
+    yPower: side("W", { min: 0 }),
+    yCad: side(foot ? "spm" : "rpm", { min: 0 }),
+    yElev: side("m"),
+    yTemp: side("°C"),
+  };
+  const used = new Set(["x", ...datasets.map(d => d.yAxisID)]);
+  const scales = Object.fromEntries(Object.entries(allScales).filter(([k]) => used.has(k)));
+
+  const laps = (s.laps || []).filter(l => l.end > l.start);
+  const lapRows = laps.length < 2 ? "" : `
+    <div class="table-wrap"><table>
+      <thead><tr><th>#</th><th>Start</th><th>Time</th><th>Avg HR</th><th>Max HR</th><th>${foot ? "Pace" : "Power"}</th><th>Cadence</th>${foot ? "<th>Climb</th>" : ""}</tr></thead>
+      <tbody>${laps.map((l, i) => `<tr>
+        <td>${i + 1}</td><td>${fmtClock(l.start)}</td><td>${fmtClock(l.end - l.start)}</td>
+        <td class="${l.avg_hr > EASY_HR_CAP ? "status-below" : ""}">${fmt(l.avg_hr)}</td><td>${fmt(l.max_hr)}</td>
+        <td>${foot ? (l.avg_speed ? formatPace(1000 / l.avg_speed / 60) : "—") : (l.avg_watts ? `${fmt(l.avg_watts)} W` : "—")}</td>
+        <td>${l.avg_cadence ? fmt(foot ? l.avg_cadence * 2 : l.avg_cadence) : "—"}</td>
+        ${foot ? `<td>${l.gain_m ? `${fmt(l.gain_m)} m` : "—"}</td>` : ""}</tr>`).join("")}</tbody>
+    </table></div>`;
+
+  const notes = ["Click a legend item to show or hide it."];
+  if (laps.length > 1) notes.push("Shaded bands are laps / workout steps; amber average HR in the table = above the easy cap.");
+  if (foot && pace) notes.push("Pace is a 30-second average from GPS, so short changes (walk to run) show with a small delay.");
+  if (act.activity_date.slice(0, 10) < ZONES_CHANGED) notes.push("Recorded before 25 Nov 2026: intervals.icu capped heart rate at the old max of 173.");
+
+  body.innerHTML = `
+    <div class="session-stats">${stats.map(([l, v]) => `<div><div class="label">${l}</div><div class="value">${v}</div></div>`).join("")}</div>
+    <div class="session-chart"><canvas id="session-chart"></canvas></div>
+    <p class="note">${notes.join(" ")}</p>
+    ${lapRows}`;
+
+  sessionChart = new Chart(document.getElementById("session-chart"), {
+    type: "line",
+    data: { datasets },
+    plugins: [lapShading],
+    options: {
+      responsive: true, maintainAspectRatio: false, animation: false, parsing: true,
+      interaction: { mode: "index", intersect: false },
+      scales,
+      plugins: {
+        lapShading: { laps },
+        legend: { labels: { boxWidth: 12 } },
+        tooltip: {
+          filter: item => !item.dataset.isRef && item.parsed.y != null,
+          callbacks: {
+            title: items => {
+              if (!items.length) return "";
+              const i = items[0].dataIndex;
+              const dist = s.dist && s.dist[i] != null ? ` · ${fmt(s.dist[i] / 1000, 2)} km` : "";
+              return `${fmtClock(s.t[i])}${dist}`;
+            },
+            label: item => item.dataset.yAxisID === "yPace"
+              ? `Pace: ${formatPace(item.parsed.y)}`
+              : `${item.dataset.label}: ${fmt(item.parsed.y, item.dataset.yAxisID === "yElev" ? 1 : 0)}`,
+          },
+        },
+      },
+    },
+  });
+}
+
 async function main() {
   const [daily, weekly, monthly, yearly, activities, zonesMonthly, zonesYearly] = await Promise.all([
     loadJSON("daily"), loadJSON("weekly"), loadJSON("monthly"), loadJSON("yearly"), loadJSON("activities"),
@@ -1271,6 +1516,8 @@ async function main() {
 
   const latest = daily[daily.length - 1];
   const latestWeek = weekly[weekly.length - 1];
+  STREAM_IDS = new Set(await loadJSON("stream_ids").catch(() => []));
+  STREAMS_VERSION = latest.calendar_date.slice(0, 10);
   // Wellness for today often arrives later than the activity data, so show the
   // most recent day that has a reading and say which day it is.
   function recoveryCard(label, key, avgKey, format) {
@@ -1554,6 +1801,7 @@ async function main() {
     dateFilter: (row, a) => a.activity_date.slice(0, 10) === row.calendar_date.slice(0, 10),
     formatLabel: row => formatDateLabel(row.calendar_date),
     buildCards: dailySummaryCards,
+    onRender: (row, acts) => renderSession(acts),
     els: {
       prev: document.getElementById("daily-summary-prev"),
       next: document.getElementById("daily-summary-next"),
