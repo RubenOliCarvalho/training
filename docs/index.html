@@ -2,7 +2,20 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Training Load Dashboard</title>
+<!-- Link preview (Strava, WhatsApp, Slack, X...). The image is static, no data. -->
+<meta name="description" content="Cycling base and trail 10K plan: fitness, fatigue and form, plan progress, and every session's heart rate, pace and power. Updated after each workout." />
+<meta name="theme-color" content="#0f1115" />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="https://rubenolicarvalho.github.io/training/" />
+<meta property="og:title" content="Training Load Dashboard" />
+<meta property="og:description" content="Cycling base and trail 10K plan: fitness, fatigue and form, plan progress, and every session's heart rate, pace and power. Updated after each workout." />
+<meta property="og:image" content="https://rubenolicarvalho.github.io/training/og-image.png" />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta property="og:image:alt" content="Training Load Dashboard: fitness, fatigue and form, plan progress, session detail" />
+<meta name="twitter:card" content="summary_large_image" />
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <!-- Written by pipeline/export_dashboard_data.py; works when opened from disk. -->
 <script src="data/dashboard_data.js"></script>
@@ -10,6 +23,7 @@
   :root {
     --bg: #0f1115; --card: #1a1d24; --text: #e6e8eb; --muted: #9aa1ab;
     --accent: #4f8cff; --good: #3ecf8e; --warn: #f5a623; --bad: #ef5350; --border: #2a2e37;
+    color-scheme: dark;  /* dark scrollbars and form controls */
   }
   * { box-sizing: border-box; }
   body { margin: 0; font-family: -apple-system, Segoe UI, Roboto, sans-serif; background: var(--bg); color: var(--text); }
@@ -129,7 +143,19 @@
   .session .empty { color: var(--muted); font-size: 13px; padding: 12px 0; }
   .session table { margin-top: 12px; border: none; }
   .session td, .session th { font-variant-numeric: tabular-nums; padding: 6px 8px; }
-  @media (max-width: 640px) { .session-chart { height: 320px; } }
+  @media (max-width: 640px) { .session-chart { height: 340px; } }
+  /* Phones: tighter gutters, a smaller date heading, a tab bar that scrolls without a scrollbar. */
+  nav { scrollbar-width: none; }
+  nav::-webkit-scrollbar { display: none; }
+  @media (max-width: 640px) {
+    header { padding: 16px; }
+    nav { padding: 0 8px; }
+    nav button { padding: 12px 10px; }
+    main { padding: 16px; }
+    .calendar-header { gap: 10px; }
+    .calendar-header h2 { font-size: 18px; min-width: 0; }
+    .session { padding: 12px; }
+  }
 </style>
 </head>
 <body>
@@ -1435,10 +1461,15 @@ function drawSession(act, s) {
   // E.g. a ride that only recorded temperature: show whatever there is.
   if (datasets.length && !datasets.some(d => !d.hidden)) datasets[0].hidden = false;
 
-  const side = (title, extra = {}) => ({ type: "linear", position: "right", display: "auto", grid: { drawOnChartArea: false }, title: { display: true, text: title }, ...extra });
+  // Phones: no axis titles (the legend names the series) and a compact legend,
+  // so the plot keeps most of the width.
+  const narrow = window.innerWidth < 640;
+  const tick = narrow ? { font: { size: 10 } } : {};
+  const side = (title, extra = {}) => ({ type: "linear", position: "right", display: "auto", grid: { drawOnChartArea: false },
+    title: { display: !narrow, text: title }, ...extra, ticks: { ...tick, ...(extra.ticks || {}) } });
   const allScales = {
-    x: { type: "linear", min: 0, max: mins[n - 1], title: { display: true, text: "Elapsed time" }, ticks: { callback: v => fmtClock(v * 60) } },
-    yHr: { type: "linear", position: "left", display: "auto", title: { display: true, text: "bpm" } },
+    x: { type: "linear", min: 0, max: mins[n - 1], title: { display: !narrow, text: "Elapsed time" }, ticks: { ...tick, maxTicksLimit: narrow ? 5 : 11, callback: v => fmtClock(v * 60) } },
+    yHr: { type: "linear", position: "left", display: "auto", title: { display: !narrow, text: "bpm" }, ticks: tick },
     yPace: side("min/km", { reverse: true, ticks: { callback: v => formatPace(v).replace(" /km", "") } }),
     ySpeed: side("km/h", { min: 0 }),
     yPower: side("W", { min: 0 }),
@@ -1446,17 +1477,20 @@ function drawSession(act, s) {
     yElev: side("m"),
     yTemp: side("°C"),
   };
+  // Phones: only HR (left) and the main series (right) get an axis; the others
+  // still draw, with values in the tooltip.
+  if (narrow) ["yCad", "yElev", "yTemp"].forEach(k => { allScales[k].display = false; });
   const used = new Set(["x", ...datasets.map(d => d.yAxisID)]);
   const scales = Object.fromEntries(Object.entries(allScales).filter(([k]) => used.has(k)));
 
   const laps = (s.laps || []).filter(l => l.end > l.start);
   const lapRows = laps.length < 2 ? "" : `
     <div class="table-wrap"><table>
-      <thead><tr><th>#</th><th>Start</th><th>Time</th><th>Avg HR</th><th>Max HR</th><th>${foot ? "Pace" : "Power"}</th><th>Cadence</th>${foot ? "<th>Climb</th>" : ""}</tr></thead>
+      <thead><tr><th>#</th><th>Start</th><th>Time</th><th>Avg HR</th><th>Max HR</th><th>${foot ? "Pace /km" : "Power"}</th><th>Cadence</th>${foot ? "<th>Climb</th>" : ""}</tr></thead>
       <tbody>${laps.map((l, i) => `<tr>
         <td>${i + 1}</td><td>${fmtClock(l.start)}</td><td>${fmtClock(l.end - l.start)}</td>
         <td class="${l.avg_hr > EASY_HR_CAP ? "status-below" : ""}">${fmt(l.avg_hr)}</td><td>${fmt(l.max_hr)}</td>
-        <td>${foot ? (l.avg_speed ? formatPace(1000 / l.avg_speed / 60) : "—") : (l.avg_watts ? `${fmt(l.avg_watts)} W` : "—")}</td>
+        <td>${foot ? (l.avg_speed ? formatPace(1000 / l.avg_speed / 60).replace(" /km", "") : "—") : (l.avg_watts ? `${fmt(l.avg_watts)} W` : "—")}</td>
         <td>${l.avg_cadence ? fmt(foot ? l.avg_cadence * 2 : l.avg_cadence) : "—"}</td>
         ${foot ? `<td>${l.gain_m ? `${fmt(l.gain_m)} m` : "—"}</td>` : ""}</tr>`).join("")}</tbody>
     </table></div>`;
@@ -1482,7 +1516,7 @@ function drawSession(act, s) {
       scales,
       plugins: {
         lapShading: { laps },
-        legend: { labels: { boxWidth: 12 } },
+        legend: { labels: narrow ? { boxWidth: 8, padding: 6, font: { size: 10 } } : { boxWidth: 12 } },
         tooltip: {
           filter: item => !item.dataset.isRef && item.parsed.y != null,
           callbacks: {
