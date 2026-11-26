@@ -75,6 +75,22 @@
   .status-tile.status-bad { border-left-color: var(--bad); } .status-tile.status-bad .status-word { color: var(--bad); }
   .status-tile.status-neutral { border-left-color: var(--accent); }
   .week-compare { color: var(--muted); font-size: 13px; margin: 0 0 20px; }
+  .matrix-wrap { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; margin-bottom: 12px; }
+  .matrix-wrap h4 { margin: 0 0 4px; font-size: 14px; }
+  .matrix-wrap .matrix-note { color: var(--muted); font-size: 12px; margin: 0 0 12px; }
+  .matrix { display: grid; grid-template-columns: 110px 1fr 1fr; gap: 8px; }
+  .matrix .axis { color: var(--muted); font-size: 12px; display: flex; align-items: center; }
+  .matrix .axis.col { justify-content: center; text-align: center; }
+  .matrix .cell { border: 1px solid var(--border); border-left: 4px solid var(--border); border-radius: 6px; padding: 10px 12px; opacity: 0.55; }
+  .matrix .cell .cell-title { font-weight: 600; font-size: 14px; }
+  .matrix .cell .cell-text { color: var(--muted); font-size: 12px; margin-top: 4px; line-height: 1.4; }
+  .matrix .cell.good { border-left-color: var(--good); } .matrix .cell.good .cell-title { color: var(--good); }
+  .matrix .cell.warn { border-left-color: var(--warn); } .matrix .cell.warn .cell-title { color: var(--warn); }
+  .matrix .cell.bad { border-left-color: var(--bad); } .matrix .cell.bad .cell-title { color: var(--bad); }
+  .matrix .cell.fresh { border-left-color: var(--accent); } .matrix .cell.fresh .cell-title { color: var(--accent); }
+  .matrix .cell.here { opacity: 1; background: #232833; box-shadow: 0 0 0 1px var(--text) inset; }
+  .matrix .cell .here-tag { display: inline-block; font-size: 11px; font-weight: 600; background: var(--text); color: var(--bg); border-radius: 4px; padding: 1px 6px; margin-left: 6px; vertical-align: middle; }
+  @media (max-width: 640px) { .matrix { grid-template-columns: 70px 1fr 1fr; } .matrix .cell .cell-text { display: none; } }
   .week-compare strong { color: var(--text); font-weight: 500; }
   .goals { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px; margin-bottom: 20px; }
   .goal { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; }
@@ -124,6 +140,7 @@
 <main>
   <section id="overview" class="active">
     <div class="status-tiles" id="overview-status"></div>
+    <div class="matrix-wrap" id="overview-matrix"></div>
     <p class="week-compare" id="overview-week-compare"></p>
     <h3 class="section-title">Goals</h3>
     <div class="goals" id="overview-goals"></div>
@@ -1061,6 +1078,38 @@ function meanSd(values) {
 
 // Readiness: the latest HRV and resting HR against your own normal range
 // (mean ± 1 SD of the previous 60 days, excluding the day itself).
+// Form x recovery matrix. Form axis: "carrying fatigue" when Form is below -10%
+// of fitness (the productive / overreaching bands), otherwise "fresh / balanced".
+// Recovery axis: "good" when readiness is green, "poor" when amber or red.
+// When the model and the body disagree, the recovery row decides the advice.
+const MATRIX_CELLS = {
+  "fatigued-good": { cls: "good", title: "Productive", text: "Training is being absorbed. Stick to the plan." },
+  "fatigued-poor": { cls: "bad", title: "Overreaching", text: "Load is outpacing recovery. Cut intensity or volume for 2-3 days." },
+  "fresh-good": { cls: "fresh", title: "Fresh", text: "Good day for a key session, test or race." },
+  "fresh-poor": { cls: "warn", title: "Not training-related", text: "Low fatigue but poor recovery: illness, stress or sleep. Easy day or rest." },
+};
+
+function formRecoveryMatrixHTML(latest, readiness) {
+  const pct = latest.ctl ? (latest.tsb / latest.ctl) * 100 : null;
+  const formKey = pct == null ? null : (pct < -10 ? "fatigued" : "fresh");
+  const recKey = readiness.level === "good" ? "good" : (readiness.level === "warn" || readiness.level === "bad") ? "poor" : null;
+  const here = formKey && recKey ? `${formKey}-${recKey}` : null;
+  const cell = key => {
+    const c = MATRIX_CELLS[key];
+    return `<div class="cell ${c.cls}${key === here ? " here" : ""}"><div class="cell-title">${c.title}` +
+      `${key === here ? '<span class="here-tag">TODAY</span>' : ""}</div><div class="cell-text">${c.text}</div></div>`;
+  };
+  const formNow = pct == null ? "no data" : `${fmt(pct)}% of fitness`;
+  const recNow = recKey ? (recKey === "good" ? "good" : "below normal") : "not enough data";
+  return `<h4>Form × recovery</h4>` +
+    `<p class="matrix-note">Form today ${formNow} · recovery ${recNow}. Form is what the training model expects; recovery is what your body says. When they disagree, follow recovery.</p>` +
+    `<div class="matrix">` +
+    `<div></div><div class="axis col">Recovery good<br>(HRV &amp; resting HR normal)</div><div class="axis col">Recovery poor<br>(HRV low or resting HR high)</div>` +
+    `<div class="axis">Carrying fatigue<br>(form &lt; −10%)</div>${cell("fatigued-good")}${cell("fatigued-poor")}` +
+    `<div class="axis">Fresh / balanced<br>(form ≥ −10%)</div>${cell("fresh-good")}${cell("fresh-poor")}` +
+    `</div>`;
+}
+
 function readinessStatus(daily) {
   const idx = daily.map((d, i) => (d.hrv != null || d.resting_hr != null ? i : -1)).filter(i => i >= 0).pop();
   if (idx === undefined) return { level: "na", word: "No data", detail: "No HRV or resting HR yet" };
@@ -1083,12 +1132,14 @@ function readinessStatus(daily) {
 // Form as a percentage of fitness (TSB / CTL). With a low CTL, absolute TSB
 // bands overstate freshness, so the bands are applied to the percentage:
 // > +20% transition, +5..+20% fresh, -10..+5% neutral, -30..-10% productive,
-// < -30% overreaching.
+// < -30% high fatigue (overreaching only if recovery is also poor).
 function formStatus(latest) {
   if (latest.ctl == null || latest.tsb == null || !latest.ctl) return { level: "na", word: "No data", detail: "" };
   const pct = (latest.tsb / latest.ctl) * 100;
   const detail = `Form ${fmt(latest.tsb, 1)} = ${fmt(pct)}% of fitness ${fmt(latest.ctl, 1)}`;
-  if (pct < -30) return { level: "bad", word: "Overreaching", detail: detail + " · fatigue well above fitness" };
+  // Form alone is the model's view; whether this is overreaching depends on
+  // recovery, which the Form x recovery matrix combines.
+  if (pct < -30) return { level: "warn", word: "High fatigue", detail: detail + " · fatigue well above fitness; see the matrix below" };
   if (pct < -10) return { level: "good", word: "Productive", detail: detail + " · building fitness" };
   if (pct <= 5) return { level: "neutral", word: "Neutral", detail };
   if (pct <= 20) return { level: "good", word: "Fresh", detail: detail + " · ready for a key session" };
@@ -1255,12 +1306,14 @@ async function main() {
   document.getElementById("overview-cards").innerHTML = cardsHTML(overviewCards);
   renderPlan(planned, weeklyPlan);
   renderProgress(rideProgress, runProgress);
+  const readiness = readinessStatus(daily), form = formStatus(latest);
   document.getElementById("overview-status").innerHTML = statusTilesHTML([
-    { label: "Readiness (HRV & resting HR vs your normal)", ...readinessStatus(daily) },
-    { label: "Form (fatigue vs fitness)", ...formStatus(latest) },
+    { label: "Readiness (HRV & resting HR vs your normal)", ...readiness },
+    { label: "Form (fatigue vs fitness)", ...form },
     { label: "This week's plan", ...weekStatus(weeklyPlan) },
     { label: "Next session", ...nextSession(planned) },
   ]);
+  document.getElementById("overview-matrix").innerHTML = formRecoveryMatrixHTML(latest, readiness);
   document.getElementById("overview-week-compare").innerHTML = weekComparison(daily, activities);
   renderGoals(daily, activities, weightTrend);
   renderPersonalBests(activities, rideProgress);
