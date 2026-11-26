@@ -7,6 +7,5 @@ select
     body_fat_pct,
     round(weight_kg * body_fat_pct / 100, 2) as fat_mass_kg,
     round(weight_kg - weight_kg * body_fat_pct / 100, 2) as fat_free_mass_kg,
-    muscle_mass_kg,
     logged_at
 from {{ source('staging', 'weight_log_raw') }}

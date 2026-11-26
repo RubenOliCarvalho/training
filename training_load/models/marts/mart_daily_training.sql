@@ -36,7 +36,6 @@ weight_joined as (
         w.body_fat_pct,
         w.fat_mass_kg,
         w.fat_free_mass_kg,
-        w.muscle_mass_kg,
         (w.log_date is not null) as is_weigh_in_day
     from training t
     left join {{ ref('stg_weight_log') }} w
@@ -44,8 +43,8 @@ weight_joined as (
 
 ),
 
--- Each body metric is forward-filled independently: body fat / muscle mass
--- are optional when logging, so a weight-only day must not reset them.
+-- Each body metric is forward-filled independently: body fat is optional when
+-- logging, so a weight-only day must not reset it.
 weight_filled as (
 
     select
@@ -54,12 +53,10 @@ weight_filled as (
         body_fat_pct,
         fat_mass_kg,
         fat_free_mass_kg,
-        muscle_mass_kg,
         is_weigh_in_day,
         count(weight_kg) over (order by calendar_date) as weight_fill_group,
         count(body_fat_pct) over (order by calendar_date) as body_fat_fill_group,
-        count(fat_mass_kg) over (order by calendar_date) as fat_mass_fill_group,
-        count(muscle_mass_kg) over (order by calendar_date) as muscle_mass_fill_group
+        count(fat_mass_kg) over (order by calendar_date) as fat_mass_fill_group
     from weight_joined
 
 ),
@@ -72,7 +69,6 @@ weight_ffill as (
         max(body_fat_pct) over (partition by body_fat_fill_group order by calendar_date) as body_fat_pct,
         max(fat_mass_kg) over (partition by fat_mass_fill_group order by calendar_date) as fat_mass_kg,
         max(fat_free_mass_kg) over (partition by fat_mass_fill_group order by calendar_date) as fat_free_mass_kg,
-        max(muscle_mass_kg) over (partition by muscle_mass_fill_group order by calendar_date) as muscle_mass_kg,
         is_weigh_in_day
     from weight_filled
 
@@ -133,7 +129,6 @@ select
     end as exercise_calorie_target_status,
     wf.weight_kg,
     wf.body_fat_pct,
-    wf.muscle_mass_kg,
     wf.fat_mass_kg,
     wf.fat_free_mass_kg,
     wf.is_weigh_in_day,

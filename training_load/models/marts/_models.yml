@@ -7,8 +7,6 @@ models:
         tests: [unique, not_null]
       - name: body_fat_pct
         description: Forward-filled from the most recent weight log with a body fat reading.
-      - name: muscle_mass_kg
-        description: Muscle mass in kg. Forward-filled from the most recent weight log with a muscle mass reading.
       - name: fat_mass_kg
         description: weight_kg * body_fat_pct / 100 of the same reading. Forward-filled from the most recent reading with body fat.
       - name: fat_free_mass_kg
