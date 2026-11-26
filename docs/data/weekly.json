@@ -1766,16 +1766,16 @@
   {
     "week_start":"2026-11-23T00:00:00.000",
     "days_in_week":4,
-    "active_days":3,
-    "active_day_rate":0.75,
-    "total_distance_km":48.71619,
+    "active_days":4,
+    "active_day_rate":1.0,
+    "total_distance_km":52.35106,
     "active_days_missing_distance":0,
-    "total_calories":935.0,
-    "total_moving_time_hours":2.0,
-    "avg_heartrate_weighted":140.3823405746,
-    "avg_ctl":14.7,
-    "avg_atl":31.94,
-    "avg_tsb":-17.24,
+    "total_calories":1268.0,
+    "total_moving_time_hours":2.6,
+    "avg_heartrate_weighted":142.35634792,
+    "avg_ctl":14.92,
+    "avg_atl":33.17,
+    "avg_tsb":-18.26,
     "avg_weight_kg":103.8,
     "avg_body_fat_pct":37.5,
     "avg_fat_mass_kg":38.9,
@@ -1789,6 +1789,6 @@
     "exercise_calorie_target_status":"below_target",
     "exercise_minutes_target_min":75,
     "exercise_minutes_target_max":150,
-    "exercise_minutes_target_status":"within_target"
+    "exercise_minutes_target_status":"above_target"
   }
 ]
