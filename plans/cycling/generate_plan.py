@@ -122,6 +122,12 @@ wk(12, 3, session(N_REC, endurance(20, 58)),
 
 BLOCKS = {1: "base1", 2: "base2", 3: "base3"}
 
+# Planned rides that were moved or dropped. They are left out of the block files
+# so re-pushing a block doesn't recreate them; replacements live in plans/adhoc.yaml.
+SKIPPED = {
+    date(2026, 11, 27): "W1 Fri: kids party at home, ride moved to Sun 29 Nov (plans/adhoc.yaml)",
+}
+
 
 def kind(desc):
     first = desc.split("\n")[0]
@@ -165,6 +171,9 @@ if __name__ == "__main__":
             monday = START_MONDAY + timedelta(weeks=n - 1)
             week_min = 0
             for offset, day, desc in zip((0, 2, 4), ("Mon", "Wed", "Fri"), days):
+                if monday + timedelta(days=offset) in SKIPPED:
+                    print(f"W{n:>2} {day}  skipped: {SKIPPED[monday + timedelta(days=offset)]}")
+                    continue
                 m = minutes(desc)
                 week_min += m
                 assert m <= 61 or "ramp test" in desc.lower(), (n, day, m)

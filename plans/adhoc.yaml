@@ -15,3 +15,17 @@ workouts:
 
       Cooldown
       - Cool down 5m ramp 60%-45% 85rpm
+
+  - date: 2026-11-29
+    name: "Bike W1 Fri - Endurance (moved to Sun)"
+    type: VirtualRide
+    description: |
+      Moved from Friday 27 Nov (kids party). Same session. Aerobic endurance (EnduranceMiles): conversational, steady; you could ride like this for hours. Ride to heart rate: if HR goes above 148, let the watts drop until it settles. It's the day after the long run/walk and the day before Monday's ride, so keep it truly easy.
+
+      Warmup
+      - Warm up 10m ramp 45%-65% 90rpm
+
+      - Endurance 25m 62% 85-95rpm
+
+      Cooldown
+      - Cool down 5m ramp 60%-45% 85rpm
