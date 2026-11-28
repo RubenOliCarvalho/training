@@ -139,36 +139,36 @@
     "year":2026,
     "zone_type":"hr",
     "zone":"Z1",
-    "secs":70314.0,
-    "hours":19.53,
-    "pct_of_total":0.3302
+    "secs":72362.0,
+    "hours":20.1,
+    "pct_of_total":0.3359
   },
   {
     "zone_key":"2026-hr-Z2",
     "year":2026,
     "zone_type":"hr",
     "zone":"Z2",
-    "secs":42757.0,
-    "hours":11.88,
-    "pct_of_total":0.2008
+    "secs":42998.0,
+    "hours":11.94,
+    "pct_of_total":0.1996
   },
   {
     "zone_key":"2026-hr-Z3",
     "year":2026,
     "zone_type":"hr",
     "zone":"Z3",
-    "secs":30544.0,
-    "hours":8.48,
-    "pct_of_total":0.1435
+    "secs":30665.0,
+    "hours":8.52,
+    "pct_of_total":0.1423
   },
   {
     "zone_key":"2026-hr-Z4",
     "year":2026,
     "zone_type":"hr",
     "zone":"Z4",
-    "secs":43039.0,
-    "hours":11.96,
-    "pct_of_total":0.2021
+    "secs":43143.0,
+    "hours":11.98,
+    "pct_of_total":0.2003
   },
   {
     "zone_key":"2026-hr-Z5",
@@ -177,7 +177,7 @@
     "zone":"Z5",
     "secs":12463.0,
     "hours":3.46,
-    "pct_of_total":0.0585
+    "pct_of_total":0.0579
   },
   {
     "zone_key":"2026-hr-Z6",
@@ -186,7 +186,7 @@
     "zone":"Z6",
     "secs":8482.0,
     "hours":2.36,
-    "pct_of_total":0.0398
+    "pct_of_total":0.0394
   },
   {
     "zone_key":"2026-hr-Z7",
@@ -195,7 +195,7 @@
     "zone":"Z7",
     "secs":5316.0,
     "hours":1.48,
-    "pct_of_total":0.025
+    "pct_of_total":0.0247
   },
   {
     "zone_key":"2026-power-SS",

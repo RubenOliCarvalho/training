@@ -258,5 +258,18 @@
     "gap_pace_min_per_km":9.49,
     "meters_per_beat":0.71,
     "is_benchmark":false
+  },
+  {
+    "activity_id":"i215586787",
+    "activity_date":"2026-11-28T00:00:00.000",
+    "activity_name":"10K W1 Sat - Long run\/walk",
+    "activity_type":"TrailRun",
+    "moving_time_min":41.9,
+    "distance_km":4.09,
+    "avg_heartrate":129.0,
+    "max_heartrate":162.0,
+    "gap_pace_min_per_km":10.06,
+    "meters_per_beat":0.77,
+    "is_benchmark":false
   }
 ]

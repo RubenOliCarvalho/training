@@ -1687,36 +1687,36 @@
     "month":"2026-11-01T00:00:00.000",
     "zone_type":"hr",
     "zone":"Z1",
-    "secs":11741.0,
-    "hours":3.26,
-    "pct_of_total":0.2681
+    "secs":13789.0,
+    "hours":3.83,
+    "pct_of_total":0.2977
   },
   {
     "zone_key":"2026-11-01-hr-Z2",
     "month":"2026-11-01T00:00:00.000",
     "zone_type":"hr",
     "zone":"Z2",
-    "secs":11093.0,
-    "hours":3.08,
-    "pct_of_total":0.2533
+    "secs":11334.0,
+    "hours":3.15,
+    "pct_of_total":0.2447
   },
   {
     "zone_key":"2026-11-01-hr-Z3",
     "month":"2026-11-01T00:00:00.000",
     "zone_type":"hr",
     "zone":"Z3",
-    "secs":7583.0,
-    "hours":2.11,
-    "pct_of_total":0.1731
+    "secs":7704.0,
+    "hours":2.14,
+    "pct_of_total":0.1663
   },
   {
     "zone_key":"2026-11-01-hr-Z4",
     "month":"2026-11-01T00:00:00.000",
     "zone_type":"hr",
     "zone":"Z4",
-    "secs":6306.0,
-    "hours":1.75,
-    "pct_of_total":0.144
+    "secs":6410.0,
+    "hours":1.78,
+    "pct_of_total":0.1384
   },
   {
     "zone_key":"2026-11-01-hr-Z5",
@@ -1725,7 +1725,7 @@
     "zone":"Z5",
     "secs":2083.0,
     "hours":0.58,
-    "pct_of_total":0.0476
+    "pct_of_total":0.045
   },
   {
     "zone_key":"2026-11-01-hr-Z6",
@@ -1734,7 +1734,7 @@
     "zone":"Z6",
     "secs":2897.0,
     "hours":0.8,
-    "pct_of_total":0.0661
+    "pct_of_total":0.0626
   },
   {
     "zone_key":"2026-11-01-hr-Z7",
@@ -1743,7 +1743,7 @@
     "zone":"Z7",
     "secs":2095.0,
     "hours":0.58,
-    "pct_of_total":0.0478
+    "pct_of_total":0.0452
   },
   {
     "zone_key":"2026-11-01-power-SS",
